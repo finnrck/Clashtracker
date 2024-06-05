@@ -63,12 +63,12 @@ if (isset($data["action"])) {
         }
     } elseif ($action === "insertApiRequest") {
         unset($data["action"]);
-    
+
         $ingame_key_with_hash = $data["tag"];
         $ingameschlüssel = substr($ingame_key_with_hash, 1);
-    
+
         $current_datetime = date("Y-m-d H:i:s");
-    
+
         // Abfrage, um das letzte Aktualisierungsdatum für diesen Ingame-Schlüssel abzurufen
         $sql_last_update = "SELECT MAX(ar.erstelldatum) AS letztes_update FROM api_requests ar
                             INNER JOIN ingame_requests_relation irr ON ar.id = irr.api_request_id
@@ -80,7 +80,7 @@ if (isset($data["action"])) {
             mysqli_stmt_bind_result($stmt_last_update, $last_update);
             mysqli_stmt_fetch($stmt_last_update);
             mysqli_stmt_close($stmt_last_update);
-    
+
             // Überprüfen, ob ein letztes Update vorhanden ist und ob es mindestens 10 Minuten her ist
             if ($last_update === null || strtotime($current_datetime) - strtotime($last_update) >= 600) {
                 // Daten speichern, da das letzte Update mindestens 10 Minuten her ist
@@ -91,7 +91,7 @@ if (isset($data["action"])) {
                     mysqli_stmt_execute($stmt_insert_api_request);
                     $api_request_id = mysqli_insert_id($conn);
                     mysqli_stmt_close($stmt_insert_api_request);
-    
+
                     // Verknüpfung zwischen Ingame-ID und API-Anfrage-ID hinzufügen
                     $sql_get_ingame_id = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
                     if ($stmt_get_ingame_id = mysqli_prepare($conn, $sql_get_ingame_id)) {
@@ -100,7 +100,7 @@ if (isset($data["action"])) {
                         mysqli_stmt_bind_result($stmt_get_ingame_id, $existing_ingame_id);
                         mysqli_stmt_fetch($stmt_get_ingame_id);
                         mysqli_stmt_close($stmt_get_ingame_id);
-    
+
                         if ($existing_ingame_id) {
                             $sql_insert_ingame_requests_relation = "INSERT INTO ingame_requests_relation (ingame_id, api_request_id) VALUES (?, ?)";
                             if ($stmt_insert_ingame_requests_relation = mysqli_prepare($conn, $sql_insert_ingame_requests_relation)) {
@@ -163,6 +163,105 @@ if (isset($data["action"])) {
             }
         } else {
             echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Ingame-ID"]);
+        }
+    } elseif ($action === "getRanking") {
+        header("Content-Type: application/json");
+
+        try {
+            $stmt = $conn->query("
+                    SELECT ranking.id, ranking.name, MAX(api_requests.erstelldatum) as last_request
+                    FROM ranking
+                    LEFT JOIN ranking_api_requests_relation ON ranking.id = ranking_api_requests_relation.ranking_id
+                    LEFT JOIN api_requests ON ranking_api_requests_relation.api_request_id = api_requests.id
+                    GROUP BY ranking.id, ranking.name
+                ");
+
+            $results = $stmt->fetch_all(MYSQLI_ASSOC);
+            $response = [];
+
+            if($results < 1){
+                $data = null;
+                $response[] = [
+                    'isOutdated' => $isOutdated,
+                    'data' => $data ? json_decode($data, true) : null
+                ];
+                echo json_encode(["status" => "success", "data" => $response]);
+            }
+
+            foreach ($results as $row) {
+                $lastRequest = $row['last_request'];
+                $isOutdated = true;
+
+                if ($lastRequest) {
+                    $lastRequestTime = new DateTime($lastRequest);
+                    $currentTime = new DateTime();
+                    $interval = $currentTime->diff($lastRequestTime);
+
+                    if ($interval->h < 1) {
+                        $isOutdated = false;
+
+                        // Daten aus der Datenbank abrufen
+                        $dataStmt = $conn->prepare("
+                                SELECT api_requests.data
+                                FROM api_requests
+                                JOIN ranking_api_requests_relation ON api_requests.id = ranking_api_requests_relation.api_request_id
+                                WHERE ranking_api_requests_relation.ranking_id = ?
+                                ORDER BY api_requests.erstelldatum DESC
+                                LIMIT 1
+                            ");
+                        $dataStmt->bind_param("i", $row['id']);
+                        $dataStmt->execute();
+                        $dataStmt->bind_result($data);
+                        $dataStmt->fetch();
+                        $dataStmt->close();
+                    } else {
+                        $data = null;
+                    }
+                } else {
+                    $data = null;
+                }
+
+                $response[] = [
+                    'id' => $row['id'],
+                    'name' => $row['name'],
+                    'isOutdated' => $isOutdated,
+                    'data' => $data ? json_decode($data, true) : null
+                ];
+            }
+            echo json_encode(["status" => "success", "data" => $response]);
+        } catch (Exception $e) {
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    } elseif ($action === "insertRankingData") {
+        unset($data["action"]);
+
+        $ranking_id = $data["rankingID"];
+        unset($data["rankingID"]);
+
+        $jsonDataString = json_encode($data);
+        $current_datetime = date("Y-m-d H:i:s");
+
+        // daten speichern
+        $sql_insert_api_data = "INSERT INTO api_requests (data, erstelldatum) VALUES (?, ?)";
+        if ($stmt_insert_api_data = mysqli_prepare($conn, $sql_insert_api_data)) {
+            mysqli_stmt_bind_param($stmt_insert_api_data, "ss", $jsonDataString, $current_datetime);
+            mysqli_stmt_execute($stmt_insert_api_data);
+            $api_request_id = mysqli_insert_id($conn);
+            mysqli_stmt_close($stmt_insert_api_data);
+
+            // ranking IDs mit den Daten verbinden
+            $sql_insert_ranking_api_requests_relation = "INSERT INTO ranking_api_requests_relation (ranking_id, api_request_id) VALUES (?, ?)";
+            if ($stmt_insert_ranking_api_requests_relation = mysqli_prepare($conn, $sql_insert_ranking_api_requests_relation)) {
+                mysqli_stmt_bind_param($stmt_insert_ranking_api_requests_relation, "ii", $ranking_id, $api_request_id);
+                mysqli_stmt_execute($stmt_insert_ranking_api_requests_relation);
+                mysqli_stmt_close($stmt_insert_ranking_api_requests_relation);
+                echo json_encode(["status" => "success"]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen der Ranking-API-Daten-Relation"]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Fehler beim Einfügen der API-Daten"]);
+            exit;
         }
     } else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
