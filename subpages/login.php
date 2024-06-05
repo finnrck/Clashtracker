@@ -181,14 +181,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <li><a href="#">Community</a></li>
                             <li><a href="/subpages/accmanager.php">Account Manager</a></li>
                         </ul>
-                        <!--TODO responsivesearch drei punkte :hover // on klick-->
                     </nav>
                 </div>
                 <div class="account-button">
                     <div id="loggedin" class="profile-box invisible"> <!-- link liste etc-->
                         <span class="profile-data">
                             <?php
-                            echo $_SESSION["username"]; //TODO dropdown schöner
+                            echo $_SESSION["username"];
                             ?>
                             <img class="data-icons" src="/images/SVG/Icon 29.svg" alt="">
                         </span>
@@ -242,7 +241,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <button type="submit">Bestätigen</button>
                                 </div>
                             </form>
-                        </div> <!--TODO login nach registrierung-->
+                        </div>
                         <div id="register" class="submit-box submit-inactive">
                             <form id="register-form" action="" method="POST">
                                 <input name="action" type="hidden" value="register">

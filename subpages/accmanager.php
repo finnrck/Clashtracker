@@ -111,7 +111,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             <div class="stats-container ">
                 <h1 id="current-ingame-key-header" class="sidebar-header managerstat-header">Kein Account zur Datenabfrage gefunden</h1>
 
-                <!-- TODO  such optionen -->
                 <div class="checkbox-section">
                     <div class="checkbox-container">
                         <label>
@@ -336,7 +335,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                                 const response = JSON.parse(xhr.responseText);
                                 if (response.status === "success") {
 
-                                    //TODO darstellung der DATEN
                                     const playerData = await getPlayerApiData(response.ingameKey);
                                     fetchApiDates(response.ingameKey, response.display_name);
                                     const display = displayAccData(playerData);
@@ -398,8 +396,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             const dropdown1 = document.getElementById("dropdown1");
             const dropdown2 = document.getElementById("dropdown2");
 
-
-            //TODO durch richtige data ersetzen
             let data1 = [];
             let data2 = [];
             for (const key in apiDates) {
@@ -442,10 +438,11 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             let ingameKey = ingamekey;
             let initialValue = "";
 
-            function processInputChange(input, displayFunction) {
+            async function processInputChange(input, displayFunction) {
                 if (input !== initialValue) {
                     initialValue = input;
-                    const display = displayFunction(ingameKey, input);
+                    playerData = await getPlayerApiData(ingameKey);
+                    const display = displayFunction(playerData, input);
                     document.getElementById("current-ingame-key").innerHTML = display;
                     document.getElementById("current-ingame-key-header").innerText = `Stats für Ingame Konto: ${displayname} (#${ingameKey}) im Vergleich zu(m) ${input}`;
                 }

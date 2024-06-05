@@ -73,9 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     error_log(print_r($input, true));
 
     if (isset($input["register-IngameKey"]) && isset($input["verify-token"])) {
-        //TODO fix das 0 und O akzeptiert werden
-
-
         $ingameKey = $input["register-IngameKey"];
         $verifyToken = $input["verify-token"];
 

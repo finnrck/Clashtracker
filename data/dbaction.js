@@ -148,14 +148,49 @@ function getApiDates(playerID) {
 });
 }
 
-function displayComparisonToOldData(ingameKey, input){
-  const html = `<div class="oldData">test Datum</div>`;
-  console.log(input);
-  return html;
+//TODO displayComparisonToOldData
+async function displayComparisonToOldData(playerData, input) {
+  playerData.input = input;
+
+  try {
+    const response = await sendRequest("getOldData", playerData);
+    const alternativData = response.data;
+
+    if (response.status === "success") {
+      console.log("daten eingefügt");
+    } else {
+      console.error("Fehler beim speicher der Daten: ", response.message);
+    }
+
+    const html = createHtmlforComparsion(playerData, alternativData);
+    return html;
+  } catch (error) {
+    console.error("Fehler bei der Anfrage: ", error);
+    return null;
+  }
 }
 
-function displayComparisonToAltAcc(ingameKey, input){
-  const html = `<div class="altAcc">test ACCOUNT</div>`;
-  console.log(input);
-  return html;
+async function displayComparisonToAltAcc(playerData, input) {
+  const jsonObject = { input: input };
+
+  try {
+    const response = await sendRequest("getDataFromAcc", jsonObject);
+    const alternativData = response.data;
+
+    if (response.status === "success") {
+      console.log("daten eingefügt");
+    } else {
+      console.error("Fehler beim Speichern der Daten: ", response.message);
+    }
+
+    const html = createHtmlforComparsion(playerData, alternativData);
+    return html;
+  } catch (error) {
+    console.error("Fehler bei der Anfrage: ", error);
+    return null; 
+  }
+}
+
+function createHtmlforComparsion(playerData, comparsionData){
+  
 }

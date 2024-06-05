@@ -102,7 +102,7 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
                     </div>
                     <div class="input-group">
                         <input id="search-input" type="text" placeholder="Zum Suchen nach einem Clan tippen">
-                        <button>Suchen</button>
+                        <button id="quicksearch">Suchen</button>
                     </div>
                 </div>
             </div>
@@ -215,7 +215,27 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
                 contentElement.innerHTML = await getRanking();
             }
         });
-        
+
+        const clanButton = document.getElementById("clanBtn");
+        const playerButton = document.getElementById("playerBtn");
+        const input = document.getElementById("search-input");
+        const button = document.getElementById("quicksearch");
+        button.addEventListener("click", (event) => {
+            let inputvalue = input.value;
+            if (inputvalue.length > 5){
+                if (clanButton.classList.contains("active")){
+                    const url = "/subpages/searchinformation/clan.php/?id=" + encodeURIComponent(inputvalue); 
+                    window.location.href = url;
+                } else if(playerButton.classList.contains("active")){
+                    const url = "/subpages/searchinformation/player.php/?id=" + encodeURIComponent(inputvalue);
+                    window.location.href = url;
+                }else{
+                    console.error("Unerwarteter Fehler: Kein Button Aktiv");
+                }
+            }else{
+                console.log("loser");
+            }
+        });
     </script>
 </body>
 
