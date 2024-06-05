@@ -147,3 +147,15 @@ function getApiDates(playerID) {
     return Promise.reject(error);
 });
 }
+
+function displayComparisonToOldData(ingameKey, input){
+  const html = `<div class="oldData">test Datum</div>`;
+  console.log(input);
+  return html;
+}
+
+function displayComparisonToAltAcc(ingameKey, input){
+  const html = `<div class="altAcc">test ACCOUNT</div>`;
+  console.log(input);
+  return html;
+}

@@ -963,8 +963,6 @@ input:where([type="text"], [type="email"], ) {
   border-bottom-right-radius: 5px;
   z-index: 1000; /* über allen elementen */
   width: 11vw;
-  bottom: 0;
-  left: 0;
 }
 
 .dropdown-accmanager div {

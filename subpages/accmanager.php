@@ -261,7 +261,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
         let displayNames = [];
         let apiDates = [];
 
-
         //TODO einbindung des Datenabrufs in dbconnection.php
         function loadAccounts() {
             const xhr = new XMLHttpRequest();
@@ -339,7 +338,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
 
                                     //TODO darstellung der DATEN
                                     const playerData = await getPlayerApiData(response.ingameKey);
-                                    fetchApiDates(response.ingameKey);
+                                    fetchApiDates(response.ingameKey, response.display_name);
                                     const display = displayAccData(playerData);
 
 
@@ -379,20 +378,19 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             }
         }
 
-        async function fetchApiDates(ingameKey) {
+        async function fetchApiDates(ingameKey, displayname) {
             try {
                 const apiDatesResponse = await getApiDates(ingameKey);
                 if (apiDatesResponse) {
                     apiDates = apiDatesResponse.dates;
-                    createInputSearch(apiDates);
-                } else {
+                    createInputSearch(ingameKey, displayname);
                 }
             } catch (error) {
                 console.error("Error fetching API dates:", error);
             }
         }
 
-        function createInputSearch() {
+        function createInputSearch(ingamekey, displayname) {
             const checkbox1 = document.getElementById("checkbox1");
             const checkbox2 = document.getElementById("checkbox2");
             const input1 = document.getElementById("input1");
@@ -436,12 +434,40 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     });
                     dropdown.appendChild(div);
                 });
-                if (data.length > 5){
+                if (data.length > 5) {
                     dropdown.classList.add("dropdown-overflow");
                 }
             }
 
-            checkbox1.addEventListener("change", function() {
+            let ingameKey = ingamekey;
+            let initialValue = "";
+
+            function processInputChange(input, displayFunction) {
+                if (input !== initialValue) {
+                    initialValue = input;
+                    const display = displayFunction(ingameKey, input);
+                    document.getElementById("current-ingame-key").innerHTML = display;
+                    document.getElementById("current-ingame-key-header").innerText = `Stats für Ingame Konto: ${displayname} (#${ingameKey}) im Vergleich zu(m) ${input}`;
+                }
+            }
+
+            function addInputEventListeners(inputElement, displayFunction) {
+                inputElement.addEventListener("blur", () => {
+                    // Verzögern des Event-Listeners um 200 Millisekunden damit value vom dropdown ankommt
+                    timeoutId = setTimeout(() => {
+                        processInputChange(inputElement.value, displayFunction);
+                    }, 200);
+                });
+                inputElement.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        processInputChange(inputElement.value, displayFunction);
+                    }
+                });
+            }
+            addInputEventListeners(input1, displayComparisonToOldData);
+            addInputEventListeners(input2, displayComparisonToAltAcc);
+
+            checkbox1.addEventListener("change", async function() {
                 if (this.checked) {
                     checkbox2.checked = false;
                     input2.disabled = true;
@@ -451,10 +477,17 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input1.disabled = true;
                     input1.value = "";
                     dropdown1.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
+                    if (initialValue != "") {
+                        const playerData = await getPlayerApiData(ingameKey);
+                        fetchApiDates(ingameKey, displayname);
+                        const display = displayAccData(playerData);
+                        document.getElementById("current-ingame-key").innerHTML = display;
+                        document.getElementById("current-ingame-key-header").innerText = "Stats für Ingame Konto: " + displayname + " (#" + ingameKey + ")";
+                    }
                 }
             });
 
-            checkbox2.addEventListener("change", function() {
+            checkbox2.addEventListener("change", async function() {
                 if (this.checked) {
                     checkbox1.checked = false;
                     input1.disabled = true;
@@ -462,7 +495,15 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input2.disabled = false;
                 } else {
                     input2.disabled = true;
+                    input2.value = "";
                     dropdown2.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
+                    if (initialValue != "") {
+                        const playerData = await getPlayerApiData(ingameKey);
+                        fetchApiDates(ingameKey, displayname);
+                        const display = displayAccData(playerData);
+                        document.getElementById("current-ingame-key").innerHTML = display;
+                        document.getElementById("current-ingame-key-header").innerText = "Stats für Ingame Konto: " + displayname + " (#" + ingameKey + ")";
+                    }
                 }
             });
 
@@ -501,12 +542,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 }
             });
         }
-
-        function eventListenerToInputSearch() {
-
-        }
-
-
 
         document.getElementById("registerForm").addEventListener("submit", function(event) {
             event.preventDefault(); //verhindert neuladen der seite beim absenden
