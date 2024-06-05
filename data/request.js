@@ -93,7 +93,7 @@ async function getRanking() {
     "clanCapitalPoints"
   ];
 
-  if (outdatedData.length > 0) {
+  if (outdatedData.length > 0 || rankingDataResponse.data == null) {
     const apiUrls = [
       "https://api.clashofclans.com/v1/locations/32000094/rankings/clans",
       "https://api.clashofclans.com/v1/locations/32000094/rankings/players",
