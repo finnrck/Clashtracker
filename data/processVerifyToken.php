@@ -1,8 +1,9 @@
 <?php
-
-function verifyToken($ingameKey, $verifyToken) {
+require_once("../config.php");
+function verifyToken($ingameKey, $verifyToken)
+{
+    global $apiKey;
     $apiUrl = "https://api.clashofclans.com/v1/players/%23" . urlencode($ingameKey) . "/verifytoken";
-    require_once("../config.php");
 
     $data = json_encode(["token" => $verifyToken]);
 
@@ -25,27 +26,63 @@ function verifyToken($ingameKey, $verifyToken) {
         return ["status" => "error", "message" => "Fehler bei der API-Anfrage", "httpCode" => $httpCode];
     }
 }
-
-function checkIngameKey($IngameKey){
-
+// funktion zum checken das der gegebene name genau die IngameID ist
+// O und 0 werden von der Api als das gleiche angesehen und akzeptiert
+// in meinem System entstehen bei eintragung einer 0 statt O oder andersrum fehler
+function checkIngameKey($ingameKey)
+{
+    global $apiKey;
     $apiUrl = "https://api.clashofclans.com/v1/players/%23" . urlencode($ingameKey);
-    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "Content-Type: application/json",
+        "Authorization: Bearer " . $apiKey
+    ));
 
+    $apiResponse = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        http_response_code(500);
+        echo json_encode(["error" => curl_error($ch)]);
+        curl_close($ch);
+        exit;
+    }
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($httpCode !== 200) {
+        http_response_code($httpCode);
+        echo json_encode(["error" => "API request failed with status code " . $httpCode]);
+        curl_close($ch);
+        exit;
+    }
+    curl_close($ch);
+    $result = json_decode($apiResponse, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        http_response_code(500);
+        echo json_encode(["error" => "Failed to decode JSON response"]);
+        exit;
+    }
+    return $result;
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $input = json_decode(file_get_contents("php://input"), true);
 
     error_log(print_r($input, true));
-    
+
     if (isset($input["register-IngameKey"]) && isset($input["verify-token"])) {
         //TODO fix das 0 und O akzeptiert werden
 
 
-        $ingameKey = checkIngameKey($input["register-IngameKey"]);
+        $ingameKey = $input["register-IngameKey"];
         $verifyToken = $input["verify-token"];
 
         $verificationResult = verifyToken($ingameKey, $verifyToken);
+        $checkIngamekeyResult = checkIngameKey($ingameKey);
+        $realIngameName = $checkIngamekeyResult["tag"];
+        $verificationResult["ingameKey"] = substr($realIngameName, 1);
         echo json_encode($verificationResult);
     } else {
         echo json_encode(["status" => "error", "message" => "Fehlende Parameter"]);
@@ -53,4 +90,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 } else {
     echo json_encode(["status" => "error", "message" => "Ungültige Anfrage"]);
 }
-?>

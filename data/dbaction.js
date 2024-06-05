@@ -1,6 +1,5 @@
 function sendRequest(action, data) {
   data.action = action;
-  console.log(data);
   return fetch("/data/dbConnection.php", {
     method: "POST",
     headers: {
@@ -28,8 +27,6 @@ function insertNewAccount(ingameschlüssel, display_name) {
 }
 
 function insertApiRequest(playerData) {
-  console.log("test for data");
-  console.log(playerData);
   sendRequest("insertApiRequest", playerData).then((response) => {
     if (response.status === "success") {
       console.log("daten eingefügt");

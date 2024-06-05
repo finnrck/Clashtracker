@@ -278,7 +278,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     } catch (error) {
                         document.getElementById("overflow").innerHTML = '<div class="button-center"><p> Keine Accounts gefunden <p><div>';
                     }
-                    console.log("reloaded the site");
                     addEventListenersToButtons();
                 } else {
                     console.error("Ein Fehler ist aufgetreten:", xhr.statusText);
@@ -405,8 +404,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             //TODO durch richtige data ersetzen
             let data1 = [];
             let data2 = [];
-            console.log("TEST");
-            console.log(apiDates);
             for (const key in apiDates) {
                 if (Object.prototype.hasOwnProperty.call(apiDates, key)) {
                     data1.push(apiDates[key]);
@@ -566,8 +563,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log("API-Antwort:", data);
-                        if (data.status === "ok") {
+                        if (data.status === "ok") { // antwort der Api nach prüfung des Token 
                             document.getElementById("failmassage").innerText = "Der Account wurde erfolgreich Verbunden";
                             document.getElementById("failmassage").style.color = "green";
                             document.querySelectorAll("#registerForm input").forEach(input => {
