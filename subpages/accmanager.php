@@ -260,6 +260,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
         let displayNames = [];
         let apiDates = [];
         let inputSearchCreated = false;
+        let inputSearchRefresh = true;
 
         //TODO einbindung des Datenabrufs in dbconnection.php
         function loadAccounts() {
@@ -363,7 +364,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 if (button) {
                     accSwitchButtons.push(button);
                     button.addEventListener("click", (event) => {
-                        inputSearchCreated = false;
+                        resetInput();
                         updateActiveButton(event.currentTarget);
                     });
                 } else {
@@ -377,12 +378,40 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             }
         }
 
+        function resetInput() {
+            inputSearchCreated = false;
+
+            const dropdown1 = document.getElementById("dropdown1");
+            const dropdown1Clone = dropdown1.cloneNode(true);
+            dropdown1.parentNode.replaceChild(dropdown1Clone, dropdown1);
+
+            const dropdown2 = document.getElementById("dropdown2");
+            const dropdown2Clone = dropdown2.cloneNode(true);
+            dropdown2.parentNode.replaceChild(dropdown2Clone, dropdown2);
+
+            const checkbox1 = document.getElementById("checkbox1");
+            const checkbox1Clone = checkbox1.cloneNode(true);
+            checkbox1.parentNode.replaceChild(checkbox1Clone, checkbox1);
+
+            const checkbox2 = document.getElementById("checkbox2");
+            const checkbox2Clone = checkbox2.cloneNode(true);
+            checkbox2.parentNode.replaceChild(checkbox2Clone, checkbox2);
+
+            const input1 = document.getElementById("input1");
+            const input1Clone = input1.cloneNode(true);
+            input1.parentNode.replaceChild(input1Clone, input1);
+
+            const input2 = document.getElementById("input2");
+            const input2Clone = input2.cloneNode(true);
+            input2.parentNode.replaceChild(input2Clone, input2);
+        }
+
         async function fetchApiDates(ingameKey, displayname) {
             try {
                 const apiDatesResponse = await getApiDates(ingameKey);
                 if (apiDatesResponse) {
                     apiDates = apiDatesResponse.dates;
-                    if (!inputSearchCreated){
+                    if (!inputSearchCreated) {
                         createInputSearch(ingameKey, displayname);
                         inputSearchCreated = true;
                     }
@@ -455,9 +484,9 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 inputElement.addEventListener("blur", () => {
                     // Verzögern des Event-Listeners um 200 Millisekunden damit value vom dropdown ankommt
                     timeoutId = setTimeout(() => {
-                        if(checkbox.checked){
+                        if (checkbox.checked) {
                             processInputChange(inputElement.value, displayFunction);
-                        } else{
+                        } else {
                             console.log("nicht mehr ausgewählt")
                         }
                     }, 200);

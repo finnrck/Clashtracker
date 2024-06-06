@@ -163,6 +163,7 @@ async function displayComparisonToOldData(playerData, input) {
     }
 
     const html = createHtmlforComparsion(playerData, alternativData);
+    console.log(html);
     return html;
   } catch (error) {
     console.error("Fehler bei der Anfrage: ", error);
@@ -184,6 +185,7 @@ async function displayComparisonToAltAcc(playerData, input) {
     }
 
     const html = createHtmlforComparsion(playerData, alternativData);
+    console.log(html);
     return html;
   } catch (error) {
     console.error("Fehler bei der Anfrage: ", error);
@@ -192,5 +194,13 @@ async function displayComparisonToAltAcc(playerData, input) {
 }
 
 function createHtmlforComparsion(playerData, comparsionData){
-  
+
+  const jsonObject = { 
+    playerData: playerData,
+    comparsionData: comparsionData
+  };
+
+  var html = "";
+
+  return jsonObject
 }
