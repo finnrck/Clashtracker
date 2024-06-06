@@ -259,6 +259,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
         let fE = "";
         let displayNames = [];
         let apiDates = [];
+        let inputSearchCreated = false;
 
         //TODO einbindung des Datenabrufs in dbconnection.php
         function loadAccounts() {
@@ -336,9 +337,8 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                                 if (response.status === "success") {
 
                                     const playerData = await getPlayerApiData(response.ingameKey);
-                                    fetchApiDates(response.ingameKey, response.display_name);
                                     const display = displayAccData(playerData);
-
+                                    fetchApiDates(response.ingameKey, response.display_name);
 
                                     document.getElementById("current-ingame-key").innerHTML = display;
                                     document.getElementById("current-ingame-key-header").innerText = "Stats für Ingame Konto: " + response.display_name + " (#" + response.ingameKey + ")"; // header update
@@ -363,6 +363,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 if (button) {
                     accSwitchButtons.push(button);
                     button.addEventListener("click", (event) => {
+                        inputSearchCreated = false;
                         updateActiveButton(event.currentTarget);
                     });
                 } else {
@@ -381,7 +382,10 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 const apiDatesResponse = await getApiDates(ingameKey);
                 if (apiDatesResponse) {
                     apiDates = apiDatesResponse.dates;
-                    createInputSearch(ingameKey, displayname);
+                    if (!inputSearchCreated){
+                        createInputSearch(ingameKey, displayname);
+                        inputSearchCreated = true;
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching API dates:", error);
@@ -414,7 +418,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 }
             }
 
-
             function filterData(data, query) {
                 return data.filter(item => item.toLowerCase().includes(query.toLowerCase()));
             }
@@ -441,18 +444,22 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             async function processInputChange(input, displayFunction) {
                 if (input !== initialValue) {
                     initialValue = input;
-                    playerData = await getPlayerApiData(ingameKey);
+                    const playerData = await getPlayerApiData(ingameKey);
                     const display = displayFunction(playerData, input);
                     document.getElementById("current-ingame-key").innerHTML = display;
                     document.getElementById("current-ingame-key-header").innerText = `Stats für Ingame Konto: ${displayname} (#${ingameKey}) im Vergleich zu(m) ${input}`;
                 }
             }
 
-            function addInputEventListeners(inputElement, displayFunction) {
+            function addInputEventListeners(inputElement, displayFunction, checkbox) {
                 inputElement.addEventListener("blur", () => {
                     // Verzögern des Event-Listeners um 200 Millisekunden damit value vom dropdown ankommt
                     timeoutId = setTimeout(() => {
-                        processInputChange(inputElement.value, displayFunction);
+                        if(checkbox.checked){
+                            processInputChange(inputElement.value, displayFunction);
+                        } else{
+                            console.log("nicht mehr ausgewählt")
+                        }
                     }, 200);
                 });
                 inputElement.addEventListener("keydown", (event) => {
@@ -461,8 +468,8 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     }
                 });
             }
-            addInputEventListeners(input1, displayComparisonToOldData);
-            addInputEventListeners(input2, displayComparisonToAltAcc);
+            addInputEventListeners(input1, displayComparisonToOldData, checkbox1);
+            addInputEventListeners(input2, displayComparisonToAltAcc, checkbox2);
 
             checkbox1.addEventListener("change", async function() {
                 if (this.checked) {
