@@ -940,7 +940,30 @@ input:where([type="text"], [type="email"], ) {
 
 
 /* accmanager comparisonData */
-
+.split-data{
+  display: flex;
+  justify-content: space-between;
+}
+.border{
+  border-right: 1px solid var(--clr-main-200);
+}
+.centered-data{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.centered-data .split{
+  width: 100%;
+  box-shadow: 0 1px 0px 0px var(--clr-main-200);
+  margin-bottom: 1.5vh;
+  margin-top: 1.5vh;
+  min-height: 1vh;
+}
+.centered-data-header{
+  padding-top: 5vh;
+}
 
 
 /* Information subpage */
