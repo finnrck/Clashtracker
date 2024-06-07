@@ -979,3 +979,22 @@ input:where([type="text"], [type="email"], ) {
   max-width: 900px;
   align-items: center;
 }
+.spinner-box{
+  height: 24vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.spinner {
+  width: 8vh;
+  height: 8vh;
+  border: 8px solid var(--clr-main-600);
+  border-top-color: var(--clr-main-200);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

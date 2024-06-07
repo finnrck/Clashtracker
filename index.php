@@ -109,8 +109,11 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
         </section>
         <section class="padding-block-900">
             <h1 class="content-hadding">Deutschland Rankings</h1>
-            <div id="content" class="container">
-
+            <div id="content" class="container rankingbox">
+                <div class="spinner-box">
+                    <div class="spinner">
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -209,7 +212,7 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
     </footer>
 
     <script>
-        document.addEventListener("DOMContentLoaded", async function() {
+        window.addEventListener("load", async function() {
             var contentElement = document.getElementById("content");
             if (contentElement) {
                 contentElement.innerHTML = await getRanking();
@@ -222,17 +225,17 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
         const button = document.getElementById("quicksearch");
         button.addEventListener("click", (event) => {
             let inputvalue = input.value;
-            if (inputvalue.length > 5){
-                if (clanButton.classList.contains("active")){
-                    const url = "/subpages/searchinformation/clan.php/?id=" + encodeURIComponent(inputvalue); 
+            if (inputvalue.length > 5) {
+                if (clanButton.classList.contains("active")) {
+                    const url = "/subpages/searchinformation/clan.php/?id=" + encodeURIComponent(inputvalue);
                     window.location.href = url;
-                } else if(playerButton.classList.contains("active")){
+                } else if (playerButton.classList.contains("active")) {
                     const url = "/subpages/searchinformation/player.php/?id=" + encodeURIComponent(inputvalue);
                     window.location.href = url;
-                }else{
+                } else {
                     console.error("Unerwarteter Fehler: Kein Button Aktiv");
                 }
-            }else{
+            } else {
                 console.log("loser");
             }
         });

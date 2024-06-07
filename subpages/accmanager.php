@@ -128,10 +128,12 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     </div>
                 </div>
 
-
                 <!--Hier werden daten automatisch geladen-->
                 <div id="current-ingame-key" class="overflow">
-
+                    <div class="spinner-box">
+                        <div class="spinner">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,6 +306,11 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                 button.classList.add("active");
                 button.classList.remove("inactive");
 
+                document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
+                        <div class="spinner">
+                        </div>
+                    </div>`;
+
                 const dropdown1 = document.getElementById("dropdown1");
                 const dropdown2 = document.getElementById("dropdown2");
                 const checkbox1 = document.getElementById("checkbox1");
@@ -473,6 +480,10 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
             async function processInputChange(input, displayFunction) {
                 if (input !== initialValue) {
                     initialValue = input;
+                    document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
+                        <div class="spinner">
+                        </div>
+                    </div>`;
                     const playerData = await getPlayerApiData(ingameKey);
                     const display = displayFunction(playerData, input);
                     document.getElementById("current-ingame-key").innerHTML = display;
@@ -511,6 +522,10 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input1.value = "";
                     dropdown1.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
                     if (initialValue != "") {
+                        document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
+                        <div class="spinner">
+                        </div>
+                    </div>`;
                         const playerData = await getPlayerApiData(ingameKey);
                         fetchApiDates(ingameKey, displayname);
                         const display = displayAccData(playerData);
@@ -531,6 +546,10 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input2.value = "";
                     dropdown2.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
                     if (initialValue != "") {
+                        document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
+                        <div class="spinner">
+                        </div>
+                    </div>`;
                         const playerData = await getPlayerApiData(ingameKey);
                         fetchApiDates(ingameKey, displayname);
                         const display = displayAccData(playerData);

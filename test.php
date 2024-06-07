@@ -109,6 +109,11 @@
                     </div>
                 </div>
 
+                <div class="spinner-box">
+                    <div class="spinner">
+                    </div>
+                </div>
+
 
                 <!--Hier werden daten automatisch geladen-->
                 <div id="current-ingame-key" class="split-data overflow">
