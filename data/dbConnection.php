@@ -269,15 +269,15 @@ if (isset($data["action"])) {
         if (!$conn) {
             die("Verbindung zur Datenbank fehlgeschlagen: " . mysqli_connect_error());
         }
-        
+
         $data = json_decode(file_get_contents("php://input"), true);
-        
+
         if (isset($data["action"]) && $data["action"] === "getOldData") {
             $tag = $data["tag"];
             $inputDate = $data["input"];
-        
+
             $ingameschlüssel = substr($tag, 1);
-        
+
             $sql_get_ingame_id = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
             if ($stmt_get_ingame_id = mysqli_prepare($conn, $sql_get_ingame_id)) {
                 mysqli_stmt_bind_param($stmt_get_ingame_id, "s", $ingameschlüssel);
@@ -285,23 +285,23 @@ if (isset($data["action"])) {
                 mysqli_stmt_bind_result($stmt_get_ingame_id, $existing_ingame_id);
                 mysqli_stmt_fetch($stmt_get_ingame_id);
                 mysqli_stmt_close($stmt_get_ingame_id);
-        
+
                 if ($existing_ingame_id) {
                     $sql_get_old_data = "SELECT ar.data FROM api_requests ar
                                          INNER JOIN ingame_requests_relation irr ON ar.id = irr.api_request_id
                                          WHERE irr.ingame_id = ? AND (ar.erstelldatum = ? OR DATE(ar.erstelldatum) = ?)";
-        
+
                     if ($stmt_get_old_data = mysqli_prepare($conn, $sql_get_old_data)) {
                         mysqli_stmt_bind_param($stmt_get_old_data, "iss", $existing_ingame_id, $inputDate, $inputDate);
                         mysqli_stmt_execute($stmt_get_old_data);
                         mysqli_stmt_bind_result($stmt_get_old_data, $jsonData);
-        
+
                         if (mysqli_stmt_fetch($stmt_get_old_data)) {
                             echo json_encode(["status" => "success", "message" => "Daten gefunden!", "data" => json_decode($jsonData, true)]);
                         } else {
                             echo json_encode(["status" => "error", "message" => "Keine Daten mit diesem Wert gefunden."]);
                         }
-        
+
                         mysqli_stmt_close($stmt_get_old_data);
                     } else {
                         echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der alten Daten"]);
@@ -316,57 +316,112 @@ if (isset($data["action"])) {
     } elseif ($action === "getDataFromAcc") {
         $input = $data["input"];
 
-    // Überprüfen, ob der input in der Tabelle ingame vorhanden ist
-    $sql_check_ingame = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
-    if ($stmt_check_ingame = mysqli_prepare($conn, $sql_check_ingame)) {
-        mysqli_stmt_bind_param($stmt_check_ingame, "s", $input);
-        mysqli_stmt_execute($stmt_check_ingame);
-        mysqli_stmt_bind_result($stmt_check_ingame, $ingame_id);
-        mysqli_stmt_fetch($stmt_check_ingame);
-        mysqli_stmt_close($stmt_check_ingame);
+        // Überprüfen, ob der input in der Tabelle ingame vorhanden ist
+        $sql_check_ingame = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
+        if ($stmt_check_ingame = mysqli_prepare($conn, $sql_check_ingame)) {
+            mysqli_stmt_bind_param($stmt_check_ingame, "s", $input);
+            mysqli_stmt_execute($stmt_check_ingame);
+            mysqli_stmt_bind_result($stmt_check_ingame, $ingame_id);
+            mysqli_stmt_fetch($stmt_check_ingame);
+            mysqli_stmt_close($stmt_check_ingame);
 
-        if (!$ingame_id) {
-            // Wenn nicht gefunden, überprüfen ob der input in der Tabelle user_ingame_relation vorhanden ist
-            $sql_check_user_ingame = "SELECT ingame_id FROM user_ingame_relation WHERE display_name = ?";
-            if ($stmt_check_user_ingame = mysqli_prepare($conn, $sql_check_user_ingame)) {
-                mysqli_stmt_bind_param($stmt_check_user_ingame, "s", $input);
-                mysqli_stmt_execute($stmt_check_user_ingame);
-                mysqli_stmt_bind_result($stmt_check_user_ingame, $ingame_id);
-                mysqli_stmt_fetch($stmt_check_user_ingame);
-                mysqli_stmt_close($stmt_check_user_ingame);
+            if (!$ingame_id) {
+                // Wenn nicht gefunden, überprüfen ob der input in der Tabelle user_ingame_relation vorhanden ist
+                $sql_check_user_ingame = "SELECT ingame_id FROM user_ingame_relation WHERE display_name = ?";
+                if ($stmt_check_user_ingame = mysqli_prepare($conn, $sql_check_user_ingame)) {
+                    mysqli_stmt_bind_param($stmt_check_user_ingame, "s", $input);
+                    mysqli_stmt_execute($stmt_check_user_ingame);
+                    mysqli_stmt_bind_result($stmt_check_user_ingame, $ingame_id);
+                    mysqli_stmt_fetch($stmt_check_user_ingame);
+                    mysqli_stmt_close($stmt_check_user_ingame);
+                }
             }
-        }
 
-        if ($ingame_id) {
-            // Wenn eine ID gefunden wurde, die zu ingame oder user_ingame_relation passt
-            $sql_get_latest_request = "
+            if ($ingame_id) {
+                // Wenn eine ID gefunden wurde, die zu ingame oder user_ingame_relation passt
+                $sql_get_latest_request = "
                 SELECT ar.data 
                 FROM api_requests ar
                 INNER JOIN ingame_requests_relation irr ON ar.id = irr.api_request_id
                 WHERE irr.ingame_id = ?
                 ORDER BY ar.erstelldatum DESC
                 LIMIT 1";
-            if ($stmt_get_latest_request = mysqli_prepare($conn, $sql_get_latest_request)) {
-                mysqli_stmt_bind_param($stmt_get_latest_request, "i", $ingame_id);
-                mysqli_stmt_execute($stmt_get_latest_request);
-                mysqli_stmt_bind_result($stmt_get_latest_request, $jsonData);
-                mysqli_stmt_fetch($stmt_get_latest_request);
-                mysqli_stmt_close($stmt_get_latest_request);
+                if ($stmt_get_latest_request = mysqli_prepare($conn, $sql_get_latest_request)) {
+                    mysqli_stmt_bind_param($stmt_get_latest_request, "i", $ingame_id);
+                    mysqli_stmt_execute($stmt_get_latest_request);
+                    mysqli_stmt_bind_result($stmt_get_latest_request, $jsonData);
+                    mysqli_stmt_fetch($stmt_get_latest_request);
+                    mysqli_stmt_close($stmt_get_latest_request);
 
-                if ($jsonData) {
-                    echo json_encode(["status" => "success", "data" => json_decode($jsonData, true)]);
+                    if ($jsonData) {
+                        echo json_encode(["status" => "success", "data" => json_decode($jsonData, true)]);
+                    } else {
+                        echo json_encode(["status" => "error", "message" => "Keine Daten für diesen Account gefunden."]);
+                    }
                 } else {
-                    echo json_encode(["status" => "error", "message" => "Keine Daten für diesen Account gefunden."]);
+                    echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Daten."]);
                 }
             } else {
-                echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Daten."]);
+                echo json_encode(["status" => "error", "message" => "Kein Ingame-Account oder Display-Name gefunden."]);
             }
         } else {
-            echo json_encode(["status" => "error", "message" => "Kein Ingame-Account oder Display-Name gefunden."]);
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung des Ingame-Accounts."]);
         }
-    } else {
-        echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung des Ingame-Accounts."]);
-    }
+    } elseif ($action === "getAllPlayerStats") {
+        $tag = $data["playerTag"];
+        $ingamekey = substr($tag, 1);
+
+        $sql_check_ingame = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
+        if ($stmt_check_ingame = mysqli_prepare($conn, $sql_check_ingame)) {
+            mysqli_stmt_bind_param($stmt_check_ingame, "s", $ingamekey);
+            mysqli_stmt_execute($stmt_check_ingame);
+            mysqli_stmt_bind_result($stmt_check_ingame, $ingame_id);
+            mysqli_stmt_fetch($stmt_check_ingame);
+            mysqli_stmt_close($stmt_check_ingame);
+
+            if ($ingame_id) {
+                $sql_get_requests = "
+                SELECT ar.* 
+                FROM api_requests ar
+                INNER JOIN ingame_requests_relation irr ON ar.id = irr.api_request_id
+                WHERE irr.ingame_id = ?
+                ORDER BY ar.erstelldatum ASC";
+                if ($stmt_get_requests = mysqli_prepare($conn, $sql_get_requests)) {
+                    mysqli_stmt_bind_param($stmt_get_requests, "i", $ingame_id);
+                    mysqli_stmt_execute($stmt_get_requests);
+                    $result = mysqli_stmt_get_result($stmt_get_requests);
+                    $data = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                    mysqli_stmt_close($stmt_get_requests);
+
+                    if ($data) {
+                        $filteredData = [];
+                        foreach ($data as $record) {
+                            $date = (new DateTime($record['erstelldatum']))->format('Y-m-d');
+                            if (!isset($filteredData[$date])) {
+                                $filteredData[$date] = $record;
+                            }
+                        }
+
+                        usort($filteredData, function ($a, $b) {
+                            return strtotime($a['erstelldatum']) - strtotime($b['erstelldatum']);
+                        });
+
+                        echo json_encode([
+                            "status" => "success",
+                            "data" => array_values($filteredData)
+                        ]);
+                    } else {
+                        echo json_encode(["status" => "error", "message" => "Keine Daten für diesen Account gefunden."]);
+                    }
+                } else {
+                    echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Daten."]);
+                }
+            } else {
+                echo json_encode(["status" => "error", "message" => "Kein Ingame-Account oder Display-Name gefunden."]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung des Ingame-Accounts."]);
+        }
     } else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
     }

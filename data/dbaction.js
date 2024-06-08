@@ -189,11 +189,137 @@ function createHtmlforComparsion(playerData, comparsionData) {
 
   var html = `<div class="split-data">`;
   dataArray.forEach((element) => {
-    html += createHtmlforDisplay(element,"split");
+    html += createHtmlforDisplay(element, "split");
   });
 
   html += "</div>";
   return html;
+}
+
+function formatYAxis(number) {
+  if (Math.abs(number) >= 1.0e9) {
+    return (number / 1.0e9).toFixed(1) + " Mrd";
+  } else if (Math.abs(number) >= 1.0e6) {
+    return (number / 1.0e6).toFixed(1) + " Mio";
+  } else if (Math.abs(number) >= 1.0e3) {
+    return (number / 1.0e3).toFixed(1) + " Tsd";
+  } else {
+    return number.toFixed(1);
+  }
+}
+
+async function createLineGraph(playerTag, goldContainer, elexierContainer, darkelexierContainer) {
+  var jsonObject = {
+    playerTag: playerTag,
+  };
+
+  var result = await sendRequest("getAllPlayerStats", jsonObject);
+  console.log(result);
+
+  var margin = { top: 30, right: 60, bottom: 60, left: 90 },
+    width = 1200 - margin.left - margin.right, // Breite der x-Achse erhöht
+    height = 300 - margin.top - margin.bottom;
+
+  var x = d3.scaleLinear().range([0, width]);
+
+  // Separate Skalierungen für jede Y-Achse
+  var yGold = d3.scaleLinear().range([height, 0]);
+  var yElexier = d3.scaleLinear().range([height, 0]);
+  var yDarkelexier = d3.scaleLinear().range([height, 0]);
+
+  var lineGold = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return yGold(d.y); });
+
+  var lineElexier = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return yElexier(d.y); });
+
+  var lineDarkelexier = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return yDarkelexier(d.y); });
+
+  var svgGold = createSvg(goldContainer);
+  var svgElexier = createSvg(elexierContainer);
+  var svgDarkelexier = createSvg(darkelexierContainer);
+
+  function createSvg(container) {
+    return d3.select(container)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  }
+
+  function processDataset(datasetString) {
+    dataset = JSON.parse(datasetString.data);
+
+    var dateParts = datasetString.erstelldatum.split(' ')[0].split('-');
+    var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+    return {
+      date: date.getTime(),
+      gold: dataset.achievements[5].value,
+      elexier: dataset.achievements[6].value,
+      darkelexier: dataset.achievements[16].value
+    };
+  }
+
+  var processedData = result.data.map(processDataset);
+
+  // Extrahiere die Daten für Gold, Elexier und Dunklelexier
+  var goldData = processedData.map(d => ({ x: d.date, y: d.gold }));
+  var elexierData = processedData.map(d => ({ x: d.date, y: d.elexier }));
+  var darkelexierData = processedData.map(d => ({ x: d.date, y: d.darkelexier }));
+
+  x.domain([processedData[0].date, processedData[processedData.length - 1].date]);
+
+  // Berechne die Domänen für jede Y-Achse separat
+  yGold.domain([0, d3.max(goldData, function(d) { return d.y; })]);
+  yElexier.domain([0, d3.max(elexierData, function(d) { return d.y; })]);
+  yDarkelexier.domain([0, d3.max(darkelexierData, function(d) { return d.y; })]);
+
+  svgGold.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+
+  svgGold.append("g")
+    .call(d3.axisLeft(yGold).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
+
+  svgGold.append("path")
+    .datum(goldData)
+    .attr("fill", "none")
+    .attr("stroke", "gold")
+    .attr("stroke-width", 1.5)
+    .attr("d", lineGold);
+
+  svgElexier.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+
+  svgElexier.append("g")
+    .call(d3.axisLeft(yElexier).tickFormat(formatYAxis)); // format
+    svgElexier.append("path")
+    .datum(elexierData)
+    .attr("fill", "none")
+    .attr("stroke", "rgb(165, 31, 165)")
+    .attr("stroke-width", 1.5)
+    .attr("d", lineElexier);
+
+svgDarkelexier.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+
+svgDarkelexier.append("g")
+    .call(d3.axisLeft(yDarkelexier).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
+
+svgDarkelexier.append("path")
+    .datum(darkelexierData)
+    .attr("fill", "none")
+    .attr("stroke", "rgb(10, 10, 56)")
+    .attr("stroke-width", 1.5)
+    .attr("d", lineDarkelexier);
 }
 
 function createHtmlforDisplay(element, view) {
@@ -226,7 +352,9 @@ function createHtmlforDisplay(element, view) {
         <h1>Ingamename: ${element.name} </h1>
         <h2>(${element.tag})</h2>
       </div>
-      <div class="split"></div>
+      <div class="split"></div> `;
+  if (view == "split") {
+    html += `
       <div class="centered-data-statusdata">
         <h3 class="subheading">Stats</h3>
         <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${
@@ -241,37 +369,64 @@ function createHtmlforDisplay(element, view) {
         <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(
           darkelex
         )}</p>
-      </div>
+      </div>`;
+  } else {
+    createLineGraph(
+      element.tag,
+      "#gold-graph",
+      "#elexier-graph",
+      "#darkelexier-graph"
+    );
+    html += `
+      <div class="centered-data-statusdata">
+        <h3 class="subheading">Stats</h3>
+        <div class="status-data-section">
+          <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${
+            element.expLevel
+          }</p>
+          <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(
+            gold
+          )}</p>
+          <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(
+            elexier
+          )}</p>
+          <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(
+            darkelex
+          )}</p>
+        </div>
+        <div class="graph-data-section">
+          <div class="graph-container">
+            <div id="gold-graph"></div>
+          </div>
+          <div class="graph-container">
+            <div id="elexier-graph"></div>
+          </div>
+          <div class="graph-container">
+            <div id="darkelexier-graph"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+  html += `
       <div class="split"></div>
       <div class="mainvillage">
         <h3 class="subheading">Hauptdorf</h3>
-        <p class="split-data-p text-center underlined">Rathauslevel: ${
-          element.townHallLevel
-        }</p>
+        <p class="split-data-p text-center underlined">Rathauslevel: ${element.townHallLevel}</p>
         <p class="split-data-p text-center">Rathausverteidigung: ${townHallWeaponLevel}</p>
         <div class="mainviliage-overview">
             <div class="display-overview">
-                <p class="split-data-p">gewonnene Verteidigungen: ${
-                  element.defenseWins
-                }</p>
-                <p class="split-data-p">gewonnene Angriffe: ${
-                  element.attackWins
-                }</p>
+                <p class="split-data-p">gewonnene Verteidigungen: ${element.defenseWins}</p>
+                <p class="split-data-p">gewonnene Angriffe: ${element.attackWins}</p>
             </div>
             <div class="display-overview">
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${
-                  element.trophies
-                }</p>
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${
-                  element.bestTrophies
-                }</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${element.trophies}</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${element.bestTrophies}</p>
             </div>
         </div> `;
-        if(view == "split"){
-          html += `<div class="hero-list">`;
-        }
-        
-        
+  if (view == "split") {
+    html += `<div class="hero-list">`;
+  }
+
   html += `<div class="split-heroes">
             <div class="hero-overview">
                 <p class="split-data-p underlined">Barbarenkönig</p>
@@ -309,10 +464,10 @@ function createHtmlforDisplay(element, view) {
                     </div>
                 </div>
             </div>`;
-        if(view == "split"){
-          html += `</div>
+  if (view == "split") {
+    html += `</div>
             <div class="split-heroes">`;
-        }
+  }
   html += `
             <div class="hero-overview">
                 <p class="split-data-p underlined">Großer Wächter</p>
@@ -349,9 +504,9 @@ function createHtmlforDisplay(element, view) {
                         <p class="split-data-p">maxLevel: ${element.existingHeroes[3].equipment[1].maxLevel}</p>
                     </div>
                 </div>`;
-        if(view == "split"){
-          html += `</div>`;
-        }
+  if (view == "split") {
+    html += `</div>`;
+  }
   html += `
             </div>
         </div>

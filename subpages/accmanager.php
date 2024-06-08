@@ -34,7 +34,8 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
     <script src="https://kit.fontawesome.com/b2c4ecfb6d.js" crossorigin="anonymous"></script>
     <script src="/script.js" defer></script>
     <script src="/data/request.js"></script>
-    <script src="/data/dbaction.js"></script>
+    <script src="/data/dbaction.js" defer></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 
 <body>

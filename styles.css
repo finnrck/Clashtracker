@@ -1111,6 +1111,19 @@ input:where([type="text"], [type="email"], ) {
 .split-data-list-item{
   padding: 10px;
 }
+.status-data-section{
+  display: flex;
+}
+.graph-data-section{
+  padding-top: 5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.graph-container{
+  width: 100%;
+}
 
 /* Information subpage */
 .information-heading-block {
