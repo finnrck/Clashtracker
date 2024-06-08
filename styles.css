@@ -985,11 +985,12 @@ input:where([type="text"], [type="email"], ) {
 }
 .split-data-p{
   font-size: var(--fs-500);
+  margin: 1vh;
 }
 .subheading{
  font-size: var(--fs-650);
  text-align: center; 
- padding-bottom: 10px;
+ margin: 2vh;
 }
 .centered-data-header{
   padding: 2vh;
@@ -1014,6 +1015,11 @@ input:where([type="text"], [type="email"], ) {
 }
 .hero-list{
   padding-top: 2vh;
+  display: flex;
+  flex-direction: column;
+}
+.split-heroes{
+  padding-top: 5vh;
   display: flex;
   justify-content: space-around;
 }

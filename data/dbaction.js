@@ -227,7 +227,18 @@ function processHeroes(element) {
         name: heroName,
         level: "-",
         maxLevel: "-",
-        equipment: []
+        equipment:[
+          {
+            name: "",
+            level: "-",
+            maxLevel: "-",
+          },
+          {
+            name: "",
+            level: "-",
+            maxLevel: "-",
+          }
+        ]
       });
     }
   }
@@ -315,6 +326,7 @@ function createHtmlforComparsion(playerData, comparsionData) {
             </div>
         </div>
         <div class="hero-list">
+            <div class="split-heroes">
             <div class="hero-overview">
                 <p class="split-data-p underlined">Barbarenkönig</p>
                 <p class="split-data-p">Level: ${element.existingHeroes[0].level}</p>
@@ -351,6 +363,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                     </div>
                 </div>
             </div>
+            </div>
+            <div class="split-heroes">
             <div class="hero-overview">
                 <p class="split-data-p underlined">Großer Wächter</p>
                 <p class="split-data-p">Level: ${element.existingHeroes[2].level}</p>
@@ -368,6 +382,25 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p class="split-data-p">maxLevel: ${element.existingHeroes[2].equipment[1].maxLevel}</p>
                     </div>
                 </div>
+            </div>
+            <div class="hero-overview">
+                <p class="split-data-p underlined">Königliche Gladiatorin</p>
+                <p class="split-data-p">Level: ${element.existingHeroes[3].level}</p>
+                <p class="split-data-p">maxLevel: ${element.existingHeroes[3].maxLevel}</p>
+                <div class="hero-equip">
+                    <p class="split-data-p text-center">Equipment</p>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 1: ${element.existingHeroes[3].equipment[0].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[3].equipment[0].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[3].equipment[0].maxLevel}</p>
+                    </div>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 2: ${element.existingHeroes[3].equipment[1].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[3].equipment[1].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[3].equipment[1].maxLevel}</p>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
