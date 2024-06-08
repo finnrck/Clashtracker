@@ -415,7 +415,7 @@ function createHtmlforComparsion(playerData, comparsionData) {
             <div>
                 <p class="split-data-p">Name: ${element.clan.name}</p>
                 <p class="split-data-p">Clanschlüssel: ${element.clan.tag}</p>
-                <p class="split-data-p">Level: ${element.level}</p>
+                <p class="split-data-p">Level: ${element.clanLevel}</p>
             </div>
         </div>
         <div>

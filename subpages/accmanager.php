@@ -520,7 +520,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input1.disabled = true;
                     input1.value = "";
                     dropdown1.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
-                    
+
                     if (initialValue != "") {
                         initialValue = "";
                         document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
@@ -567,8 +567,11 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     createDropdown(dropdown, filteredData, input);
                     dropdown.classList.remove("invisible"); // Menü anzeigen
                     const rect = input.getBoundingClientRect();
-                    dropdown.style.left = `${rect.left}px`;
-                    dropdown.style.top = `${rect.bottom}px`;
+                    //berechnung der positionierung des Dropdownmenüs 
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                    dropdown.style.left = `${rect.left + scrollLeft}px`;
+                    dropdown.style.top = `${rect.bottom + scrollTop}px`;
                 } else {
                     dropdown.classList.add("invisible"); // Menü verstecken keine Ergebnisse gefunden
                 }
