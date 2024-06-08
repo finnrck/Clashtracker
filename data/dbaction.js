@@ -39,93 +39,9 @@ function insertApiRequest(playerData) {
 function displayAccData(playerData) {
   insertApiRequest(playerData);
 
-  //TODO vollüberarbeitung
-  var playerHtml = `
-<div class="player-container">
-  <div class="player-header">
-    <h1 class="player-name">${playerData.name}</h1>
-  </div>
-  <div class="player-details">
-    <div class="player-info">
-      <p class="exp-level">Experience Level: ${playerData.expLevel}</p>
-      <p class="war-stars">War Stars: ${playerData.warStars}</p>
-      <p class="role">Role: ${playerData.role}</p>
-      <p class="clan-capital-contributions">Clan Capital Contributions: ${
-        playerData.clanCapitalContributions
-      }</p>
-    </div>
-    <div class="town-hall">
-      <p>Town Hall Level: ${playerData.townHallLevel}</p>
-      <p>Town Hall Weapon Level: ${playerData.townHallWeaponLevel}</p>
-      <p class="trophies">Trophies: ${playerData.trophies}</p>
-      <p class="best-trophies">Best Trophies: ${playerData.bestTrophies}</p>
-    </div>
-    <div class="builder-base">
-      <p>Builder Hall Level: ${playerData.builderHallLevel}</p>
-      <p>Builder Base Trophies: ${playerData.builderBaseTrophies}</p>
-      <p>Best Builder Base Trophies: ${playerData.bestBuilderBaseTrophies}</p>
-      <p>Builder Base League: ${playerData.builderBaseLeague.name}</p>
-    </div>
-  </div>
-  <div class="clan-info">
-  <img class="clan-badge" src="${
-    playerData.clan.badgeUrls.medium
-  }" alt="Clan Badge">
-    <div class="clan-data">
-    <h2 class="clan-name">${playerData.clan.name}</h2>
-    <p class="clan-tag">${playerData.clan.tag}</p>
-    <p class="clan-level">Clan Level: ${playerData.clan.clanLevel}</p>
-    <p class="donations">Donations: ${playerData.donations}</p>
-    <p class="donations-received">Donations Received: ${
-      playerData.donationsReceived
-    }</p>
-    </div>
-  </div>
-  
-  <div class="troops">
-    <h3>Troops:</h3>
-    <div class="troop-container">
-    <ul class="troop-list">
-      ${playerData.troops
-        .map(
-          (troop) => `
-        <li class="troop">
-          <p class="troop-name">${troop.name} (${troop.village})</p>
-          <p class="troop-level">Level: ${troop.level} / ${troop.maxLevel}</p>
-        </li>
-      `
-        )
-        .join("")}
-    </ul>
-    </div>
-  </div>
-  <div class="achievements">
-    <h3>Achievements:</h3>
-    <ul>
-      ${playerData.achievements
-        .map(
-          (achievement) => `
-        <li class="achievement">
-          <p class="achievement-name">${achievement.name} (${
-            achievement.village
-          })</p>
-          <p class="achievement-stars">Stars: ${achievement.stars}</p>
-          <p class="achievement-info">${achievement.info}</p>
-          <p class="achievement-value">Value: ${achievement.value} / ${
-            achievement.target
-          }</p>
-          ${
-            achievement.completionInfo
-              ? `<p class="achievement-completion">${achievement.completionInfo}</p>`
-              : ""
-          }
-        </li>
-      `
-        )
-        .join("")}
-    </ul>
-  </div>
-</div>`;
+  var playerHtml = `<div class="display-single-data">`;
+  playerHtml += createHtmlforDisplay(playerData);
+  playerHtml += "</div>";
 
   return playerHtml;
 }
@@ -152,7 +68,6 @@ function getApiDates(playerID) {
     });
 }
 
-//TODO displayComparisonToOldData
 async function displayComparisonToOldData(playerData, input) {
   playerData.input = input;
 
@@ -207,27 +122,27 @@ function processHeroes(element) {
     "Grand Warden",
     "Royal Champion",
     "Battle Machine",
-    "Battle Copter"
+    "Battle Copter",
   ];
 
   element.existingHeroes = [];
 
   for (const heroName of possibleHeroes) {
-    const hero = element.heroes.find(h => h.name === heroName);
+    const hero = element.heroes.find((h) => h.name === heroName);
 
     if (hero) {
       element.existingHeroes.push({
         name: hero.name,
         level: hero.level,
         maxLevel: hero.maxLevel,
-        equipment: hero.equipment || []
+        equipment: hero.equipment || [],
       });
     } else {
       element.existingHeroes.push({
         name: heroName,
         level: "-",
         maxLevel: "-",
-        equipment:[
+        equipment: [
           {
             name: "",
             level: "-",
@@ -237,8 +152,8 @@ function processHeroes(element) {
             name: "",
             level: "-",
             maxLevel: "-",
-          }
-        ]
+          },
+        ],
       });
     }
   }
@@ -255,7 +170,7 @@ function splitByVillage(array) {
   const homeArray = [];
   const builderBaseArray = [];
 
-  array.forEach(item => {
+  array.forEach((item) => {
     if (item.village === "home") {
       homeArray.push(item);
     } else if (item.village === "builderBase") {
@@ -265,7 +180,7 @@ function splitByVillage(array) {
 
   return {
     home: splitArray(homeArray),
-    builderBase: splitArray(builderBaseArray)
+    builderBase: splitArray(builderBaseArray),
   };
 }
 
@@ -274,29 +189,38 @@ function createHtmlforComparsion(playerData, comparsionData) {
 
   var html = `<div class="split-data">`;
   dataArray.forEach((element) => {
+    html += createHtmlforDisplay(element,"split");
+  });
 
-    let gold = element.achievements[5].value;
-    let elexier = element.achievements[6].value;
-    let darkelex = element.achievements[16].value;
-    let warPreference = element.warPreference;
-    let townHallWeaponLevel = element.townHallWeaponLevel;
-    let spells = splitArray(element.spells);
-    let achievements = splitArray(element.achievements);
-    if (townHallWeaponLevel == undefined){
-      townHallWeaponLevel = "-";
-    }
-    if(warPreference == "in"){
-      warPreference = "nimmt teil"
-    }else{
-      warPreference = "keine Teilnahme"
-    }
+  html += "</div>";
+  return html;
+}
 
-    processHeroes(element);
-    console.log(element.troops);
-    element.troops = splitByVillage(element.troops);
-    console.log(element.troops);
+function createHtmlforDisplay(element, view) {
+  var view = view;
+  var html = "";
+  let gold = element.achievements[5].value;
+  let elexier = element.achievements[6].value;
+  let darkelex = element.achievements[16].value;
+  let warPreference = element.warPreference;
+  let townHallWeaponLevel = element.townHallWeaponLevel;
+  let spells = splitArray(element.spells);
+  let achievements = splitArray(element.achievements);
+  if (townHallWeaponLevel == undefined) {
+    townHallWeaponLevel = "-";
+  }
+  if (warPreference == "in") {
+    warPreference = "nimmt teil";
+  } else {
+    warPreference = "keine Teilnahme";
+  }
 
-    html += `
+  processHeroes(element);
+  console.log(element.troops);
+  element.troops = splitByVillage(element.troops);
+  console.log(element.troops);
+
+  html += `
     <div class="centered-data border">
       <div class="centered-data-header">
         <h1>Ingamename: ${element.name} </h1>
@@ -305,28 +229,50 @@ function createHtmlforComparsion(playerData, comparsionData) {
       <div class="split"></div>
       <div class="centered-data-statusdata">
         <h3 class="subheading">Stats</h3>
-        <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${element.expLevel}</p>
-        <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(gold)}</p>
-        <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(elexier)}</p>
-        <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(darkelex)}</p>
+        <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${
+          element.expLevel
+        }</p>
+        <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(
+          gold
+        )}</p>
+        <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(
+          elexier
+        )}</p>
+        <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(
+          darkelex
+        )}</p>
       </div>
       <div class="split"></div>
       <div class="mainvillage">
         <h3 class="subheading">Hauptdorf</h3>
-        <p class="split-data-p text-center underlined">Rathauslevel: ${element.townHallLevel}</p>
+        <p class="split-data-p text-center underlined">Rathauslevel: ${
+          element.townHallLevel
+        }</p>
         <p class="split-data-p text-center">Rathausverteidigung: ${townHallWeaponLevel}</p>
         <div class="mainviliage-overview">
             <div class="display-overview">
-                <p class="split-data-p">gewonnene Verteidigungen: ${element.defenseWins}</p>
-                <p class="split-data-p">gewonnene Angriffe: ${element.attackWins}</p>
+                <p class="split-data-p">gewonnene Verteidigungen: ${
+                  element.defenseWins
+                }</p>
+                <p class="split-data-p">gewonnene Angriffe: ${
+                  element.attackWins
+                }</p>
             </div>
             <div class="display-overview">
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${element.trophies}</p>
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${element.bestTrophies}</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${
+                  element.trophies
+                }</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${
+                  element.bestTrophies
+                }</p>
             </div>
-        </div>
-        <div class="hero-list">
-            <div class="split-heroes">
+        </div> `;
+        if(view == "split"){
+          html += `<div class="hero-list">`;
+        }
+        
+        
+  html += `<div class="split-heroes">
             <div class="hero-overview">
                 <p class="split-data-p underlined">Barbarenkönig</p>
                 <p class="split-data-p">Level: ${element.existingHeroes[0].level}</p>
@@ -362,9 +308,12 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p class="split-data-p">maxLevel: ${element.existingHeroes[1].equipment[1].maxLevel}</p>
                     </div>
                 </div>
-            </div>
-            </div>
-            <div class="split-heroes">
+            </div>`;
+        if(view == "split"){
+          html += `</div>
+            <div class="split-heroes">`;
+        }
+  html += `
             <div class="hero-overview">
                 <p class="split-data-p underlined">Großer Wächter</p>
                 <p class="split-data-p">Level: ${element.existingHeroes[2].level}</p>
@@ -399,8 +348,11 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p class="split-data-p">Level: ${element.existingHeroes[3].equipment[1].level}</p>
                         <p class="split-data-p">maxLevel: ${element.existingHeroes[3].equipment[1].maxLevel}</p>
                     </div>
-                </div>
-            </div>
+                </div>`;
+        if(view == "split"){
+          html += `</div>`;
+        }
+  html += `
             </div>
         </div>
     </div>
@@ -411,15 +363,21 @@ function createHtmlforComparsion(playerData, comparsionData) {
         <div class="builderbase-stats">
             <div>
                 <p class="split-data-p text-center">Tropähen</p>
-                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${element.builderBaseTrophies}</p>
+                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${
+                  element.builderBaseTrophies
+                }</p>
             </div>
             <div>
                 <p class="split-data-p text-center">Liga</p>
-                <p class="split-data-p text-center">${element.builderBaseLeague.name}</p>
+                <p class="split-data-p text-center">${
+                  element.builderBaseLeague.name
+                }</p>
             </div>
             <div>
                 <p class="split-data-p text-center">Trophäenrekord</p>
-                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${element.bestBuilderBaseTrophies}</p>
+                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${
+                  element.bestBuilderBaseTrophies
+                }</p>
             </div>
         </div>
         <div class="builder-heros">
@@ -427,13 +385,21 @@ function createHtmlforComparsion(playerData, comparsionData) {
             <div class="builder-hero-data">
                 <div>
                     <p class="split-data-p underlined">Kampfmaschine: </p>
-                    <p class="split-data-p">Level: ${element.existingHeroes[4].level}</p>
-                    <p class="split-data-p">maxLevel: ${element.existingHeroes[4].maxLevel}</p>
+                    <p class="split-data-p">Level: ${
+                      element.existingHeroes[4].level
+                    }</p>
+                    <p class="split-data-p">maxLevel: ${
+                      element.existingHeroes[4].maxLevel
+                    }</p>
                 </div>
                 <div>
                     <p class="split-data-p underlined">Kampfschrauber: </p>
-                    <p class="split-data-p">Level: ${element.existingHeroes[5].level}</p>
-                    <p class="split-data-p">maxLevel: ${element.existingHeroes[5].maxLevel}</p>
+                    <p class="split-data-p">Level: ${
+                      element.existingHeroes[5].level
+                    }</p>
+                    <p class="split-data-p">maxLevel: ${
+                      element.existingHeroes[5].maxLevel
+                    }</p>
                 </div>
             </div>
         </div>
@@ -443,7 +409,9 @@ function createHtmlforComparsion(playerData, comparsionData) {
         <h3 class="subheading">Clan</h3>
         <div class="clan-splitdata-overview">
             <div>
-                <img class="clan-badge" src="${element.clan.badgeUrls.medium}" alt="Clan Badge">
+                <img class="clan-badge" src="${
+                  element.clan.badgeUrls.medium
+                }" alt="Clan Badge">
             </div>
             <div>
                 <p class="split-data-p">Name: ${element.clan.name}</p>
@@ -454,16 +422,22 @@ function createHtmlforComparsion(playerData, comparsionData) {
         <div>
             <div class="clan-splitdata-overview">
                 <p class="split-data-p">Rolle: ${element.role}</p>
-                <p class="split-data-p">Clanstadtbeitrag: ${formatNumberWithDots(element.clanCapitalContributions)}</p>
+                <p class="split-data-p">Clanstadtbeitrag: ${formatNumberWithDots(
+                  element.clanCapitalContributions
+                )}</p>
             </div>
             <div class="clan-splitdata-overview">
                 <div>
                     <p class="split-data-p">Spenden: ${element.donations}</p>
-                    <p class="split-data-p">erhaltene Spenden: ${element.donationsReceived}</p>
+                    <p class="split-data-p">erhaltene Spenden: ${
+                      element.donationsReceived
+                    }</p>
                 </div>
                 <div>
                     <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Klankriege: ${warPreference}</p>
-                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Kriegssterne: ${element.warStars}</p>
+                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Kriegssterne: ${
+                      element.warStars
+                    }</p>
                 </div>
             </div>
         </div>
@@ -481,7 +455,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${troop.name}</p>
                         <p>Level: ${troop.level} / ${troop.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -493,7 +468,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${troop.name}</p>
                         <p>Level: ${troop.level} / ${troop.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
         </div>
@@ -511,7 +487,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${spell.name}</p>
                         <p>Level: ${spell.level} / ${spell.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -523,7 +500,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${spell.name}</p>
                         <p>Level: ${spell.level} / ${spell.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
         </div>
@@ -541,7 +519,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${troop.name}</p>
                         <p>Level: ${troop.level} / ${troop.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -553,7 +532,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>${troop.name}</p>
                         <p>Level: ${troop.level} / ${troop.maxLevel}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
         </div>
@@ -573,7 +553,8 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>Info: ${achievement.info} </p>
                         <p>${achievement.value} / ${achievement.target}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -587,14 +568,12 @@ function createHtmlforComparsion(playerData, comparsionData) {
                         <p>Info: ${achievement.info} </p>
                         <p>${achievement.value} / ${achievement.target}</p>
                     `
-                    ).join("")}
+                  )
+                  .join("")}
               </ul>
             </div>
         </div>
     </div>
 </div>`;
- });
-
-  html += "</div>"
   return html;
 }
