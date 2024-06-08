@@ -262,7 +262,6 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
         let displayNames = [];
         let apiDates = [];
         let inputSearchCreated = false;
-        let inputSearchRefresh = true;
 
         //TODO einbindung des Datenabrufs in dbconnection.php
         function loadAccounts() {
@@ -485,7 +484,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                         </div>
                     </div>`;
                     const playerData = await getPlayerApiData(ingameKey);
-                    const display = displayFunction(playerData, input);
+                    const display = await displayFunction(playerData, input);
                     document.getElementById("current-ingame-key").innerHTML = display;
                     document.getElementById("current-ingame-key-header").innerText = `Stats für Ingame Konto: ${displayname} (#${ingameKey}) im Vergleich zu(m) ${input}`;
                 }
@@ -521,7 +520,9 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input1.disabled = true;
                     input1.value = "";
                     dropdown1.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
+                    
                     if (initialValue != "") {
+                        initialValue = "";
                         document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
                         <div class="spinner">
                         </div>
@@ -546,6 +547,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     input2.value = "";
                     dropdown2.classList.add("invisible"); // Menü verstecken Checkbox deaktiviert
                     if (initialValue != "") {
+                        initialValue = "";
                         document.getElementById("current-ingame-key").innerHTML = `<div class="spinner-box">
                         <div class="spinner">
                         </div>

@@ -132,20 +132,24 @@ function displayAccData(playerData) {
 
 function getApiDates(playerID) {
   const data = {
-    ingameschlüssel: playerID
+    ingameschlüssel: playerID,
   };
 
-  return sendRequest("getApiDates", data).then((response) => {
-    if (response.status === "success") {
+  return sendRequest("getApiDates", data)
+    .then((response) => {
+      if (response.status === "success") {
         return response;
-    } else {
+      } else {
         console.error("Fehler beim Abrufen der Daten:", response.message);
-        return Promise.reject("Fehler beim Abrufen der Daten: " + response.message);
-    }
-}).catch(error => {
-    console.error("Fehler beim Abrufen der Daten:", error);
-    return Promise.reject(error);
-});
+        return Promise.reject(
+          "Fehler beim Abrufen der Daten: " + response.message
+        );
+      }
+    })
+    .catch((error) => {
+      console.error("Fehler beim Abrufen der Daten:", error);
+      return Promise.reject(error);
+    });
 }
 
 //TODO displayComparisonToOldData
@@ -163,7 +167,6 @@ async function displayComparisonToOldData(playerData, input) {
     }
 
     const html = createHtmlforComparsion(playerData, alternativData);
-    console.log(html);
     return html;
   } catch (error) {
     console.error("Fehler bei der Anfrage: ", error);
@@ -185,22 +188,380 @@ async function displayComparisonToAltAcc(playerData, input) {
     }
 
     const html = createHtmlforComparsion(playerData, alternativData);
-    console.log(html);
     return html;
   } catch (error) {
     console.error("Fehler bei der Anfrage: ", error);
-    return null; 
+    return null;
+  }
+}
+function formatNumberWithDots(number) {
+  let numStr = number.toString();
+  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function processHeroes(element) {
+  // Liste der möglichen Helden
+  const possibleHeroes = [
+    "Barbarian King",
+    "Archer Queen",
+    "Grand Warden",
+    "Royal Champion",
+    "Battle Machine",
+    "Battle Copter"
+  ];
+
+  element.existingHeroes = [];
+
+  for (const heroName of possibleHeroes) {
+    const hero = element.heroes.find(h => h.name === heroName);
+
+    if (hero) {
+      element.existingHeroes.push({
+        name: hero.name,
+        level: hero.level,
+        maxLevel: hero.maxLevel,
+        equipment: hero.equipment || []
+      });
+    } else {
+      element.existingHeroes.push({
+        name: heroName,
+        level: "-",
+        maxLevel: "-",
+        equipment: []
+      });
+    }
   }
 }
 
-function createHtmlforComparsion(playerData, comparsionData){
+function splitArray(array) {
+  const middleIndex = Math.ceil(array.length / 2);
+  const firstArray = array.slice(0, middleIndex);
+  const secondArray = array.slice(middleIndex);
+  return [firstArray, secondArray];
+}
 
-  const jsonObject = { 
-    playerData: playerData,
-    comparsionData: comparsionData
+function splitByVillage(array) {
+  const homeArray = [];
+  const builderBaseArray = [];
+
+  array.forEach(item => {
+    if (item.village === "home") {
+      homeArray.push(item);
+    } else if (item.village === "builderBase") {
+      builderBaseArray.push(item);
+    }
+  });
+
+  return {
+    home: splitArray(homeArray),
+    builderBase: splitArray(builderBaseArray)
   };
+}
 
-  var html = "";
+function createHtmlforComparsion(playerData, comparsionData) {
+  const dataArray = [playerData, comparsionData];
 
-  return jsonObject
+  var html = `<div class="split-data">`;
+  dataArray.forEach((element) => {
+
+    let gold = element.achievements[5].value;
+    let elexier = element.achievements[6].value;
+    let darkelex = element.achievements[16].value;
+    let warPreference = element.warPreference;
+    let townHallWeaponLevel = element.townHallWeaponLevel;
+    let spells = splitArray(element.spells);
+    let achievements = splitArray(element.achievements);
+    if (townHallWeaponLevel == undefined){
+      townHallWeaponLevel = "-";
+    }
+    if(warPreference == "in"){
+      warPreference = "nimmt teil"
+    }else{
+      warPreference = "keine Teilnahme"
+    }
+
+    processHeroes(element);
+    console.log(element.troops);
+    element.troops = splitByVillage(element.troops);
+    console.log(element.troops);
+
+    html += `
+    <div class="centered-data border">
+      <div class="centered-data-header">
+        <h1>Ingamename: ${element.name} </h1>
+        <h2>(${element.tag})</h2>
+      </div>
+      <div class="split"></div>
+      <div class="centered-data-statusdata">
+        <h3 class="subheading">Stats</h3>
+        <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${element.expLevel}</p>
+        <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(gold)}</p>
+        <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(elexier)}</p>
+        <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(darkelex)}</p>
+      </div>
+      <div class="split"></div>
+      <div class="mainvillage">
+        <h3 class="subheading">Hauptdorf</h3>
+        <p class="split-data-p text-center underlined">Rathauslevel: ${element.townHallLevel}</p>
+        <p class="split-data-p text-center">Rathausverteidigung: ${townHallWeaponLevel}</p>
+        <div class="mainviliage-overview">
+            <div class="display-overview">
+                <p class="split-data-p">gewonnene Verteidigungen: ${element.defenseWins}</p>
+                <p class="split-data-p">gewonnene Angriffe: ${element.attackWins}</p>
+            </div>
+            <div class="display-overview">
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${element.trophies}</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${element.bestTrophies}</p>
+            </div>
+        </div>
+        <div class="hero-list">
+            <div class="hero-overview">
+                <p class="split-data-p underlined">Barbarenkönig</p>
+                <p class="split-data-p">Level: ${element.existingHeroes[0].level}</p>
+                <p class="split-data-p">maxLevel: ${element.existingHeroes[0].maxLevel}</p>
+                <div class="hero-equip">
+                    <p class="split-data-p text-center">Equipment</p>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 1: ${element.existingHeroes[0].equipment[0].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[0].equipment[0].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[0].equipment[0].maxLevel}</p>
+                    </div>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 2: ${element.existingHeroes[0].equipment[1].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[0].equipment[1].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[0].equipment[1].maxLevel}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-overview">
+                <p class="split-data-p underlined">Bogenschützenkönigin</p>
+                <p class="split-data-p">Level: ${element.existingHeroes[1].level}</p>
+                <p class="split-data-p">maxLevel: ${element.existingHeroes[1].maxLevel}</p>
+                <div class="hero-equip">
+                    <p class="split-data-p text-center">Equipment</p>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 1: ${element.existingHeroes[1].equipment[0].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[1].equipment[0].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[1].equipment[0].maxLevel}</p>
+                    </div>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 2: ${element.existingHeroes[1].equipment[1].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[1].equipment[1].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[1].equipment[1].maxLevel}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-overview">
+                <p class="split-data-p underlined">Großer Wächter</p>
+                <p class="split-data-p">Level: ${element.existingHeroes[2].level}</p>
+                <p class="split-data-p">maxLevel: ${element.existingHeroes[2].maxLevel}</p>
+                <div class="hero-equip">
+                    <p class="split-data-p text-center">Equipment</p>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 1: ${element.existingHeroes[2].equipment[0].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[2].equipment[0].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[2].equipment[0].maxLevel}</p>
+                    </div>
+                    <div class="equip-div">
+                        <p class="split-data-p">Slot 2: ${element.existingHeroes[2].equipment[1].name}</p>
+                        <p class="split-data-p">Level: ${element.existingHeroes[2].equipment[1].level}</p>
+                        <p class="split-data-p">maxLevel: ${element.existingHeroes[2].equipment[1].maxLevel}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="builderbase">
+        <h3 class="subheading">Nachttdorf</h3>
+        <p class="split-data-p text-center underlined">Meisterhütte: </p>
+        <div class="builderbase-stats">
+            <div>
+                <p class="split-data-p text-center">Tropähen</p>
+                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${element.builderBaseTrophies}</p>
+            </div>
+            <div>
+                <p class="split-data-p text-center">Liga</p>
+                <p class="split-data-p text-center">${element.builderBaseLeague.name}</p>
+            </div>
+            <div>
+                <p class="split-data-p text-center">Trophäenrekord</p>
+                <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${element.bestBuilderBaseTrophies}</p>
+            </div>
+        </div>
+        <div class="builder-heros">
+            <p class="split-data-p underlined">Helden</p>
+            <div class="builder-hero-data">
+                <div>
+                    <p class="split-data-p underlined">Kampfmaschine: </p>
+                    <p class="split-data-p">Level: ${element.existingHeroes[4].level}</p>
+                    <p class="split-data-p">maxLevel: ${element.existingHeroes[4].maxLevel}</p>
+                </div>
+                <div>
+                    <p class="split-data-p underlined">Kampfschrauber: </p>
+                    <p class="split-data-p">Level: ${element.existingHeroes[5].level}</p>
+                    <p class="split-data-p">maxLevel: ${element.existingHeroes[5].maxLevel}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="clan-splitdata">
+        <h3 class="subheading">Clan</h3>
+        <div class="clan-splitdata-overview">
+            <div>
+                <img class="clan-badge" src="${element.clan.badgeUrls.medium}" alt="Clan Badge">
+            </div>
+            <div>
+                <p class="split-data-p">Name: ${element.clan.name}</p>
+                <p class="split-data-p">Clanschlüssel: ${element.clan.tag}</p>
+                <p class="split-data-p">Level: ${element.level}</p>
+            </div>
+        </div>
+        <div>
+            <div class="clan-splitdata-overview">
+                <p class="split-data-p">Rolle: ${element.role}</p>
+                <p class="split-data-p">Clanstadtbeitrag: ${formatNumberWithDots(element.clanCapitalContributions)}</p>
+            </div>
+            <div class="clan-splitdata-overview">
+                <div>
+                    <p class="split-data-p">Spenden: ${element.donations}</p>
+                    <p class="split-data-p">erhaltene Spenden: ${element.donationsReceived}</p>
+                </div>
+                <div>
+                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Klankriege: ${warPreference}</p>
+                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Kriegssterne: ${element.warStars}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="split-data-mainvillage-troops-container">
+        <h3 class="subheading">Truppen</h3>
+        <div class="split-data-mainvillage-troops height-160">
+            <div class="mainvillage-troops">
+              <ul class="split-data-list">
+                ${element.troops.home[0]
+                  .map(
+                    (troop) => `
+                      <li class="split-data-list-item">
+                        <p>${troop.name}</p>
+                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+            <div class="mainvillage-troops">
+                <ul class="split-data-list">
+                ${element.troops.home[1]
+                  .map(
+                    (troop) => `
+                      <li class="split-data-list-item">
+                        <p>${troop.name}</p>
+                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="split-data-mainvillage-troops-container">
+        <h3 class="subheading">Zauber</h3>
+        <div class="split-data-mainvillage-troops height-80">
+            <div class="mainvillage-troops">
+              <ul class="split-data-list">
+                ${spells[0]
+                  .map(
+                    (spell) => `
+                      <li class="split-data-list-item">
+                        <p>${spell.name}</p>
+                        <p>Level: ${spell.level} / ${spell.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+            <div class="mainvillage-troops">
+                <ul class="split-data-list">
+                ${spells[1]
+                  .map(
+                    (spell) => `
+                      <li class="split-data-list-item">
+                        <p>${spell.name}</p>
+                        <p>Level: ${spell.level} / ${spell.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="split-data-mainvillage-troops-container">
+        <h3 class="subheading">Truppen Nachtdorf</h3>
+        <div class="split-data-mainvillage-troops height-80">
+            <div class="mainvillage-troops">
+              <ul class="split-data-list">
+                ${element.troops.builderBase[0]
+                  .map(
+                    (troop) => `
+                      <li class="split-data-list-item">
+                        <p>${troop.name}</p>
+                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+            <div class="mainvillage-troops">
+                <ul class="split-data-list">
+                ${element.troops.builderBase[1]
+                  .map(
+                    (troop) => `
+                      <li class="split-data-list-item">
+                        <p>${troop.name}</p>
+                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+        </div>
+    </div>
+    <div class="split"></div>
+    <div class="split-data-mainvillage-troops-container">
+        <h3 class="subheading">Achievements</h3>
+        <div class="split-data-mainvillage-troops height-320">
+            <div class="mainvillage-troops">
+              <ul class="split-data-list">
+                ${achievements[0]
+                  .map(
+                    (achievement) => `
+                      <li class="split-data-list-item">
+                        <p>${achievement.name}</p>
+                        <p>Sterne: ${achievement.stars} / 3</p>
+                        <p>Info: ${achievement.info} </p>
+                        <p>${achievement.value} / ${achievement.target}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+            <div class="mainvillage-troops">
+                <ul class="split-data-list">
+                ${achievements[1]
+                  .map(
+                    (achievement) => `
+                      <li class="split-data-list-item">
+                        <p>${achievement.name}</p>
+                        <p>Sterne: ${achievement.stars} / 3</p>
+                        <p>Info: ${achievement.info} </p>
+                        <p>${achievement.value} / ${achievement.target}</p>
+                    `
+                    ).join("")}
+              </ul>
+            </div>
+        </div>
+    </div>
+</div>`;
+ });
+
+  html += "</div>"
+  return html;
 }
