@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "templates.php";
-if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
+if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
     //prüft ob user eingeloggt ist und ändert je nach dem den Log in Button zum Username mit dropdown menu
     echo "<script>
     document.addEventListener(\"DOMContentLoaded\", function() {

@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "../../templates.php";
-if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])){
+if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])){
     echo "<script>
     document.addEventListener(\"DOMContentLoaded\", function() {
         document.getElementById(\"loggedin\").classList.add(\"visible\");

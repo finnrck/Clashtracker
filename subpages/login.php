@@ -8,7 +8,7 @@ $response = [
     "redirect" => ""
 ];
 
-if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])) {
+if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
     echo "<script>
     document.addEventListener(\"DOMContentLoaded\", function() {
         document.getElementById(\"loggedin\").classList.add(\"visible\");
@@ -52,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password_verify($password, $row["password"])) {
                 $_SESSION["user_id"] = $row["id"];
                 $_SESSION["username"] = $row["username"];
+                $_SESSION["displayname"] = $row["displayname"];
 
                 $response["success"] = true;
                 $response["message"] = "Login erfolgreich";
@@ -119,14 +120,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $hasedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO users(username, email, password, displayname) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $benutzername, $email, $hasedPassword);
+        mysqli_stmt_bind_param($stmt, "sss", $benutzername, $email, $hasedPassword, $benutzername);
 
         if (mysqli_stmt_execute($stmt)) {
             $user_id = mysqli_insert_id($conn);
             $_SESSION["user_id"] = $user_id;
-            $_SESSION["username"] = $benutzername;
+            $_SESSION["displayname"] = $benutzername;
 
             $response["success"] = true;
             $response["message"] = "Registrierung erfolgreich";
