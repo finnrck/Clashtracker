@@ -14,8 +14,8 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["username"])){
 ?>
 <head>
     <meta charset="UTF-8" />
-    <title>Home</title>
-
+    <title>Spielerinfo</title>
+    <link rel="icon" href="/images/cocTracker-favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="https://kit.fontawesome.com/b2c4ecfb6d.js" crossorigin="anonymous"></script>

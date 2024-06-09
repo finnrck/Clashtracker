@@ -146,9 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <head>
     <meta charset="UTF-8" />
-    <title>Home</title>
-
-
+    <title>Login</title>
+    <link rel="icon" href="/images/cocTracker-favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/script.js" defer></script>
