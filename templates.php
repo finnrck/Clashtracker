@@ -39,14 +39,10 @@ ob_start();
                         <img class="data-icons" src="/images/SVG/Icon 29.svg" alt="">
                     </span>
                     <div class="dropdown-content">
-                        <div class="dropdown-item">
-                            <a href="/subpages/accmanager.php">Account Manager</a>
-                        </div>
-                        <div class="dropdown-item">
-                            <a href="/subpages/accountsettings.php">Settings</a>
-                        </div>
-                        <div class="dropdown-item">
-                            <button class="dropdown-logout" id="Logout-button">log out</button>
+                        <a class="dropdown-item" href="/subpages/accmanager.php">Account Manager</a>
+                        <a class="dropdown-item" href="/subpages/accountsettings.php">Settings</a>
+                        <div class="dropdown-item-button">
+                            <button class="button" id="Logout-button">log out</button>
                         </div>
                     </div>
                 </div>

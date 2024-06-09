@@ -337,7 +337,8 @@ h1 {
 .dropdown-content {
   display: none;
   position: absolute;
-  padding: 8px;
+  width: 90%;
+  padding: 0.75vh;
   background-color: var(--clr-main-800);
   min-width: 170px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -350,11 +351,23 @@ h1 {
   color: var(--clr-main-200);
 }
 .dropdown-item {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
 }
+.dropdown-item-button{
+  padding: 10px;
+}
+.dropdown-item-button button{
+  width: 100%;
+}
+.dropdown-item-button button:hover{
+  background-color: var(--clr-accent-300);
+}
+
 .dropdown-item:hover {
   background-color: var(--clr-main-600);
+  color: var(--clr-accent-400);
 }
 .dropdown-logout {
   background-color: var(--clr-main-800);
@@ -385,7 +398,7 @@ h1 {
   font-weight: var(--fw-bold);
   font-size: var(--fs-button);
   line-height: 1;
-  color: var(--clr-neutral-100);
+  color: var(--clr-main-200);
   background-color: var(--clr-accent-400);
 }
 
