@@ -33,9 +33,9 @@ ob_start();
             <div class="account-button">
                 <div id="loggedin" class="profile-box invisible"> <!-- link liste etc-->
                     <span class="profile-data">
-                        <?php
-                        echo $_SESSION["username"];
-                        ?>
+                        <p id="displayname-header"><?php
+                            echo $_SESSION["displayname"];
+                            ?></p>
                         <img class="data-icons" src="/images/SVG/Icon 29.svg" alt="">
                     </span>
                     <div class="dropdown-content">

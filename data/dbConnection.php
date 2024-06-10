@@ -1,7 +1,10 @@
 <?php
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once("../config.php");
+
 
 $conn = mysqli_connect($servername, $username, $password, $dbname);
 
@@ -269,49 +272,44 @@ if (isset($data["action"])) {
         if (!$conn) {
             die("Verbindung zur Datenbank fehlgeschlagen: " . mysqli_connect_error());
         }
+        $tag = $data["tag"];
+        $inputDate = $data["input"];
 
-        $data = json_decode(file_get_contents("php://input"), true);
+        $ingameschlüssel = substr($tag, 1);
 
-        if (isset($data["action"]) && $data["action"] === "getOldData") {
-            $tag = $data["tag"];
-            $inputDate = $data["input"];
+        $sql_get_ingame_id = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
+        if ($stmt_get_ingame_id = mysqli_prepare($conn, $sql_get_ingame_id)) {
+            mysqli_stmt_bind_param($stmt_get_ingame_id, "s", $ingameschlüssel);
+            mysqli_stmt_execute($stmt_get_ingame_id);
+            mysqli_stmt_bind_result($stmt_get_ingame_id, $existing_ingame_id);
+            mysqli_stmt_fetch($stmt_get_ingame_id);
+            mysqli_stmt_close($stmt_get_ingame_id);
 
-            $ingameschlüssel = substr($tag, 1);
-
-            $sql_get_ingame_id = "SELECT id FROM ingame WHERE ingameschlüssel = ?";
-            if ($stmt_get_ingame_id = mysqli_prepare($conn, $sql_get_ingame_id)) {
-                mysqli_stmt_bind_param($stmt_get_ingame_id, "s", $ingameschlüssel);
-                mysqli_stmt_execute($stmt_get_ingame_id);
-                mysqli_stmt_bind_result($stmt_get_ingame_id, $existing_ingame_id);
-                mysqli_stmt_fetch($stmt_get_ingame_id);
-                mysqli_stmt_close($stmt_get_ingame_id);
-
-                if ($existing_ingame_id) {
-                    $sql_get_old_data = "SELECT ar.data FROM api_requests ar
+            if ($existing_ingame_id) {
+                $sql_get_old_data = "SELECT ar.data FROM api_requests ar
                                          INNER JOIN ingame_requests_relation irr ON ar.id = irr.api_request_id
                                          WHERE irr.ingame_id = ? AND (ar.erstelldatum = ? OR DATE(ar.erstelldatum) = ?)";
 
-                    if ($stmt_get_old_data = mysqli_prepare($conn, $sql_get_old_data)) {
-                        mysqli_stmt_bind_param($stmt_get_old_data, "iss", $existing_ingame_id, $inputDate, $inputDate);
-                        mysqli_stmt_execute($stmt_get_old_data);
-                        mysqli_stmt_bind_result($stmt_get_old_data, $jsonData);
+                if ($stmt_get_old_data = mysqli_prepare($conn, $sql_get_old_data)) {
+                    mysqli_stmt_bind_param($stmt_get_old_data, "iss", $existing_ingame_id, $inputDate, $inputDate);
+                    mysqli_stmt_execute($stmt_get_old_data);
+                    mysqli_stmt_bind_result($stmt_get_old_data, $jsonData);
 
-                        if (mysqli_stmt_fetch($stmt_get_old_data)) {
-                            echo json_encode(["status" => "success", "message" => "Daten gefunden!", "data" => json_decode($jsonData, true)]);
-                        } else {
-                            echo json_encode(["status" => "error", "message" => "Keine Daten mit diesem Wert gefunden."]);
-                        }
-
-                        mysqli_stmt_close($stmt_get_old_data);
+                    if (mysqli_stmt_fetch($stmt_get_old_data)) {
+                        echo json_encode(["status" => "success", "message" => "Daten gefunden!", "data" => json_decode($jsonData, true)]);
                     } else {
-                        echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der alten Daten"]);
+                        echo json_encode(["status" => "error", "message" => "Keine Daten mit diesem Wert gefunden."]);
                     }
+
+                    mysqli_stmt_close($stmt_get_old_data);
                 } else {
-                    echo json_encode(["status" => "error", "message" => "Kein Ingame-Eintrag mit diesem Schlüssel gefunden"]);
+                    echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der alten Daten"]);
                 }
             } else {
-                echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Ingame-ID"]);
+                echo json_encode(["status" => "error", "message" => "Kein Ingame-Eintrag mit diesem Schlüssel gefunden"]);
             }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das Abrufen der Ingame-ID"]);
         }
     } elseif ($action === "getDataFromAcc") {
         $input = $data["input"];
@@ -422,9 +420,78 @@ if (isset($data["action"])) {
         } else {
             echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung des Ingame-Accounts."]);
         }
+    } elseif ($action === "updateUserData") {
+        $user_id = $data["user_id"];
+        $newUsername = $data["newUsername"];
+        $newDisplayname = $data["newDisplayname"];
+
+        $sql = "SELECT * FROM users WHERE username = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $newUsername);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if (mysqli_num_rows($result) > 0) {
+
+            $sql = "SELECT username FROM users WHERE id = ?";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, "i", $user_id);
+            mysqli_stmt_execute($stmt);
+            $oldUsernameresult = mysqli_stmt_get_result($stmt);
+
+            $row = mysqli_fetch_assoc($oldUsernameresult);
+            $oldUsername = $row["username"];
+            if ($oldUsername != $newUsername) {
+                echo json_encode(["status" => "error", "message" => "Benutzername bereits vergeben!" , "oldUsername" => $oldUsername, "newUsername" => $newUsername]);
+                exit();
+            }
+        }
+        $sql = "UPDATE users SET displayname = ?, username = ? WHERE id = ?;";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $newDisplayname, $newUsername, $user_id);
+        mysqli_stmt_execute($stmt);
+        $_SESSION["displayname"] = $newDisplayname;
+        $_SESSION["username"] = $newUsername;
+        echo json_encode(["status" => "success", "message" => "Daten erfolgreich verändert"]);
     } else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
     }
 }
+
+function getUserData($user_id)
+{
+    global $servername;
+    global $username;
+    global $password;
+    global $dbname;
+    $conn = mysqli_connect($servername, $username, $password, $dbname);
+
+    $sql_get_user_data = "SELECT id, username, email, password, displayname FROM users WHERE id = ?";
+
+    if ($stmt_check_users = mysqli_prepare($conn, $sql_get_user_data)) {
+        mysqli_stmt_bind_param($stmt_check_users, "i", $user_id);
+        mysqli_stmt_execute($stmt_check_users);
+        mysqli_stmt_bind_result($stmt_check_users, $id, $username, $email, $password, $displayname);
+
+        if (mysqli_stmt_fetch($stmt_check_users)) {
+            $user_data = [
+                "id" => $id,
+                "username" => $username,
+                "email" => $email,
+                "password" => $password,
+                "displayname" => $displayname
+            ];
+        } else {
+            return json_encode(["status" => "error", "message" => "Kein Benutzer mit der angegebenen ID gefunden."]);
+        }
+
+        mysqli_stmt_close($stmt_check_users);
+        return json_encode(["status" => "success", "data" => $user_data]);
+    } else {
+        return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung der UserID."]);
+    }
+    mysqli_close($conn);
+}
+
 
 mysqli_close($conn);

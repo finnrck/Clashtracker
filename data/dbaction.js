@@ -10,6 +10,22 @@ function sendRequest(action, data) {
     .then((response) => response.json())
     .catch((error) => console.error("Fehler bei der Fetch-Operation:", error));
 }
+async function updateUserData(user_id, newDisplayname, newUsername){
+  const data = {
+    user_id: user_id,
+    newUsername: newUsername,
+    newDisplayname: newDisplayname
+  }
+  return await sendRequest("updateUserData", data).then((response) => {
+    if (response.status === "success") {
+      return response;
+    } else {
+      console.log(response);
+      console.error("Fehler beim Einfügen des Accounts:", response.message);
+      return response;
+    }
+  });
+}
 
 function insertNewAccount(ingameschlüssel, display_name) {
   const data = {

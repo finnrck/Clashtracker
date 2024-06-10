@@ -1151,3 +1151,94 @@ input:where([type="text"], [type="email"], ) {
   max-width: 900px;
   align-items: center;
 }
+
+/* Account Settings */
+.settings-header{
+  margin: 5vh;
+  color: var(--clr-main-200);
+  font-size: var(--fs-800);
+}
+.setting-container{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.setting-block{
+  padding: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
+  background-color: var(--clr-main-800);
+  border: 1px solid var(--clr-main-200);
+}
+.setting-block h2{
+  font-size: var(--fs-700);
+  margin-bottom: 5vh;
+}
+.user-data-container{
+  border-radius: 3vh 3vh 0 0;
+  border-bottom: none;
+}
+.user-data-block{
+  display: flex;
+  align-items: center;
+}
+.user-data-block p{
+  flex: 1;
+  margin-right: 2vw;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+}
+.user-data-block .fa-circle-question{
+  margin-left: 1vw;
+  color: var(--clr-main-200);
+}
+.user-data-block input{
+  width: 15vw;
+}
+.user-data-block input:disabled{
+  background-color: var(--clr-main-600);
+  border: 1px solid var(--clr-main-200);
+  color: var(--clr-main-400);
+  cursor: not-allowed;
+}
+.user-data-password{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15vw;
+  flex: 2;
+}
+.user-data-password button{
+  width: 60%;
+  justify-content: center;
+}
+.ingame-user-data-container{
+  border-radius: 0 0 3vh 3vh;
+  margin-bottom: 10vh;
+}
+.userSetting-form{
+  display: flex;
+  flex-direction: column;
+}
+.userSetting-form button:hover{
+  background-color: var(--clr-accent-300);
+}
+.setting-button{
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  width: 50%;
+  margin-top: 5vh;
+}
+.settings-failmassage-box{
+  margin-top: 2vh;
+  min-height: 5vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
