@@ -466,7 +466,7 @@ h1 {
   padding-bottom: 2vh;
 }
 
-input:where([type="text"], [type="email"], ) {
+input:where([type="text"], [type="email"], [type="password"]) {
   border-radius: 100vw;
   border: 0;
   padding: var(--size-300) var(--size-400);
@@ -1241,4 +1241,12 @@ input:where([type="text"], [type="email"], ) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.passwordchange-input{
+  width: 100%;
+  height: 5vh;
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+  padding: 1vh;
+  box-sizing: border-box;
 }

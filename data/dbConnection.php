@@ -442,7 +442,7 @@ if (isset($data["action"])) {
             $row = mysqli_fetch_assoc($oldUsernameresult);
             $oldUsername = $row["username"];
             if ($oldUsername != $newUsername) {
-                echo json_encode(["status" => "error", "message" => "Benutzername bereits vergeben!" , "oldUsername" => $oldUsername, "newUsername" => $newUsername]);
+                echo json_encode(["status" => "error", "message" => "Benutzername bereits vergeben!", "oldUsername" => $oldUsername, "newUsername" => $newUsername]);
                 exit();
             }
         }
@@ -453,6 +453,20 @@ if (isset($data["action"])) {
         $_SESSION["displayname"] = $newDisplayname;
         $_SESSION["username"] = $newUsername;
         echo json_encode(["status" => "success", "message" => "Daten erfolgreich verändert"]);
+    } else if ($action === "updatePassword") {
+        $user_id = $data["user_id"];
+        $newPW = $data["newPassword"];
+
+        $hasedPassword = password_hash($newPW, PASSWORD_DEFAULT);
+
+        $sql_update_password = "UPDATE users SET password = ? WHERE id = ?;";
+        if ($stmt_update_password = mysqli_prepare($conn, $sql_update_password)) {
+            mysqli_stmt_bind_param($stmt_update_password, "si", $hasedPassword, $user_id);
+            mysqli_stmt_execute($stmt_update_password);
+            echo json_encode(["status" => "success", "message" => "Password erfolgreich verändert"]);
+        } else {
+            return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das ändern des Passworts."]);
+        }
     } else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
     }
@@ -490,6 +504,30 @@ function getUserData($user_id)
     } else {
         return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für die Überprüfung der UserID."]);
     }
+    mysqli_close($conn);
+}
+function updatePassword($newPW, $user_id)
+{
+    //TODO connection fehler idk
+    global $servername, $username, $password, $dbname;
+    $conn = mysqli_connect($servername, $username, $password, $dbname);
+
+    return json_encode(["status" => "error", "message" => $password]);
+
+    if (!$conn) {
+        return json_encode(["status" => "error", "message" => "Verbindung zur Datenbank fehlgeschlagen: " . mysqli_connect_error()]);
+    }
+
+    $hasedPassword = password_hash($newPW, PASSWORD_DEFAULT);
+
+    $sql_update_password = "UPDATE users SET password = ? WHERE id = ?;";
+    if ($stmt_update_password = mysqli_prepare($conn, $sql_update_password)) {
+        mysqli_stmt_bind_param($stmt_update_password, "si", $hasedPassword, $user_id);
+        mysqli_stmt_execute($stmt_update_password);
+    } else {
+        return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das ändern des Passworts."]);
+    }
+
     mysqli_close($conn);
 }
 

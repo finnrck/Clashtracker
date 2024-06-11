@@ -27,6 +27,22 @@ async function updateUserData(user_id, newDisplayname, newUsername){
   });
 }
 
+async function updatePassword(newPW, user_id){
+  const data = {
+    user_id: user_id,
+    newPassword: newPW
+  }
+  return await sendRequest("updatePassword", data).then((response) => {
+    if (response.status === "success") {
+      return response;
+    } else {
+      console.log(response);
+      console.error("Fehler beim Einfügen des Accounts:", response.message);
+      return response;
+    }
+  });
+}
+
 function insertNewAccount(ingameschlüssel, display_name) {
   const data = {
     ingameschlüssel: ingameschlüssel,

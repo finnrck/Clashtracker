@@ -9,21 +9,40 @@ const addAccbox = document.getElementById("add-acc-box");
 const closeing = document.getElementById("closeing-btn");
 const mngMain = document.getElementById("manager-main");
 const searchinput = document.getElementById("search-input");
+const changePassword = document.getElementById("change-password");
+const passwordButton = document.getElementById("password-openbutton");
+const settings = document.getElementById("settings");
 
-if (addAcc && mngMain){
-    addAcc.addEventListener("click", () => {
-        addAccbox.classList.add("visible");
-        addAccbox.classList.remove("invisible");
-        mngMain.classList.add("blur");
-    });
+if (changePassword && passwordButton) {
+  passwordButton.addEventListener("click", () => {
+    changePassword.classList.add("visible");
+    changePassword.classList.remove("invisible");
+    settings.classList.add("blur");
+  });
 }
-if (closeing && mngMain){
-    closeing.addEventListener("click", () => {
-        addAccbox.classList.add("invisible");
-        addAccbox.classList.remove("visible");
-        mngMain.classList.remove("blur");
-        document.getElementById("failmassage").innerText = "";
-    });
+
+if (closeing && changePassword) {
+  closeing.addEventListener("click", () => {
+    changePassword.classList.add("invisible");
+    changePassword.classList.remove("visible");
+    settings.classList.remove("blur");
+  });
+}
+
+if (addAcc && mngMain) {
+  addAcc.addEventListener("click", () => {
+    addAccbox.classList.add("visible");
+    addAccbox.classList.remove("invisible");
+    mngMain.classList.add("blur");
+  });
+}
+if (closeing && mngMain) {
+  closeing.addEventListener("click", () => {
+    addAccbox.classList.add("invisible");
+    addAccbox.classList.remove("visible");
+    mngMain.classList.remove("blur");
+    document.getElementById("failmassage").innerText = "";
+  });
 }
 
 if (clanBtn && playerBtn) {
@@ -33,7 +52,10 @@ if (clanBtn && playerBtn) {
     playerBtn.classList.add("inactive");
     playerBtn.classList.remove("active");
     searchinput.value = "";
-    searchinput.setAttribute("placeholder","Zum Suchen nach einem Clan tippen");
+    searchinput.setAttribute(
+      "placeholder",
+      "Zum Suchen nach einem Clan tippen"
+    );
   });
 
   playerBtn.addEventListener("click", () => {
@@ -42,33 +64,36 @@ if (clanBtn && playerBtn) {
     clanBtn.classList.add("inactive");
     clanBtn.classList.remove("active");
     searchinput.value = "";
-    searchinput.setAttribute("placeholder","Zum Suchen nach einem Spieler tippen");
+    searchinput.setAttribute(
+      "placeholder",
+      "Zum Suchen nach einem Spieler tippen"
+    );
   });
 }
 
-if (login && loginBtn){
-    loginBtn.addEventListener("click", () => {
-        loginBtn.classList.add("active");
-        loginBtn.classList.remove("inactive");
-        login.classList.add("submit-active");
-        login.classList.remove("submit-inactive");
-        registerBtn.classList.add("inactive");
-        registerBtn.classList.remove("active");
-        register.classList.add("submit-inactive");
-        register.classList.remove("submit-active");
-    });
+if (login && loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    loginBtn.classList.add("active");
+    loginBtn.classList.remove("inactive");
+    login.classList.add("submit-active");
+    login.classList.remove("submit-inactive");
+    registerBtn.classList.add("inactive");
+    registerBtn.classList.remove("active");
+    register.classList.add("submit-inactive");
+    register.classList.remove("submit-active");
+  });
 }
-if (register && registerBtn){
-    registerBtn.addEventListener("click", () => {
-        registerBtn.classList.add("active");
-        registerBtn.classList.remove("inactive");
-        register.classList.add("submit-active");
-        register.classList.remove("submit-inactive");
-        loginBtn.classList.add("inactive");
-        loginBtn.classList.remove("active");
-        login.classList.add("submit-inactive");
-        login.classList.remove("submit-active");
-    });
+if (register && registerBtn) {
+  registerBtn.addEventListener("click", () => {
+    registerBtn.classList.add("active");
+    registerBtn.classList.remove("inactive");
+    register.classList.add("submit-active");
+    register.classList.remove("submit-inactive");
+    loginBtn.classList.add("inactive");
+    loginBtn.classList.remove("active");
+    login.classList.add("submit-inactive");
+    login.classList.remove("submit-active");
+  });
 }
 
 document.getElementById("Logout-button").addEventListener("click", function () {

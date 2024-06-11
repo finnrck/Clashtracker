@@ -122,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hasedPassword = password_hash($password, PASSWORD_DEFAULT);
         $sql = "INSERT INTO users(username, email, password, displayname) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $benutzername, $email, $hasedPassword, $benutzername);
+        mysqli_stmt_bind_param($stmt, "ssss", $benutzername, $email, $hasedPassword, $benutzername); //nicht testet mit ssss
 
         if (mysqli_stmt_execute($stmt)) {
             $user_id = mysqli_insert_id($conn);
