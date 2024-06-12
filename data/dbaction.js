@@ -10,12 +10,12 @@ function sendRequest(action, data) {
     .then((response) => response.json())
     .catch((error) => console.error("Fehler bei der Fetch-Operation:", error));
 }
-async function updateUserData(user_id, newDisplayname, newUsername){
+async function updateUserData(user_id, newDisplayname, newUsername) {
   const data = {
     user_id: user_id,
     newUsername: newUsername,
-    newDisplayname: newDisplayname
-  }
+    newDisplayname: newDisplayname,
+  };
   return await sendRequest("updateUserData", data).then((response) => {
     if (response.status === "success") {
       return response;
@@ -27,11 +27,58 @@ async function updateUserData(user_id, newDisplayname, newUsername){
   });
 }
 
-async function updatePassword(newPW, user_id){
+async function updateDisplayname(inputvalue, ingame_id, user_id) {
+  const data = {
+    newDisplayname: inputvalue,
+    ingame_id: ingame_id,
+    user_id: user_id
+  };
+  return await sendRequest("updateDisplayname", data).then((response) => {
+    return response;
+  });
+}
+
+async function displayAllIngameAccounts(user_id) {
   const data = {
     user_id: user_id,
-    newPassword: newPW
-  }
+  };
+  return await sendRequest("getAllIngameAccs", data).then((response) => {
+    if (response.status === "success") {
+      var html = "";
+
+      response.data.forEach((item) => {
+        html += `
+                <div class="ingame-settingcontainer" data-ingame-id="${item.ingame_id}">
+                    <p>#${item.ingameschlüssel}</p>
+                    <div class="ingame-setting-accountfield">
+                        <div class="ingame-setting-accountdata">
+                            <input class="newdisplayname_input" type="text" value="${item.display_name}" disabled data-original-value="${item.display_name}">
+                        </div>
+                        <div class="ingame-setting-accountedit">
+                            <div class="edit-btn-box">
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square fa-lg"></i></button>
+                            </div>
+                            <div class="save-cancel-buttons invisible">
+                                <button class="save-btn"><i class="fa-solid fa-check fa-lg"></i></button>
+                                <button class="cancel-btn"><i class="fa-solid fa-xmark fa-lg"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+      });
+      return html;
+    } else {
+      return `<div>${response.message}</div>`;
+    }
+  });
+}
+
+async function updatePassword(newPW, user_id) {
+  const data = {
+    user_id: user_id,
+    newPassword: newPW,
+  };
   return await sendRequest("updatePassword", data).then((response) => {
     if (response.status === "success") {
       return response;
@@ -240,7 +287,12 @@ function formatYAxis(number) {
   }
 }
 
-async function createLineGraph(playerTag, goldContainer, elexierContainer, darkelexierContainer) {
+async function createLineGraph(
+  playerTag,
+  goldContainer,
+  elexierContainer,
+  darkelexierContainer
+) {
   var jsonObject = {
     playerTag: playerTag,
   };
@@ -259,24 +311,40 @@ async function createLineGraph(playerTag, goldContainer, elexierContainer, darke
   var yElexier = d3.scaleLinear().range([height, 0]);
   var yDarkelexier = d3.scaleLinear().range([height, 0]);
 
-  var lineGold = d3.line()
-    .x(function(d) { return x(d.x); })
-    .y(function(d) { return yGold(d.y); });
+  var lineGold = d3
+    .line()
+    .x(function (d) {
+      return x(d.x);
+    })
+    .y(function (d) {
+      return yGold(d.y);
+    });
 
-  var lineElexier = d3.line()
-    .x(function(d) { return x(d.x); })
-    .y(function(d) { return yElexier(d.y); });
+  var lineElexier = d3
+    .line()
+    .x(function (d) {
+      return x(d.x);
+    })
+    .y(function (d) {
+      return yElexier(d.y);
+    });
 
-  var lineDarkelexier = d3.line()
-    .x(function(d) { return x(d.x); })
-    .y(function(d) { return yDarkelexier(d.y); });
+  var lineDarkelexier = d3
+    .line()
+    .x(function (d) {
+      return x(d.x);
+    })
+    .y(function (d) {
+      return yDarkelexier(d.y);
+    });
 
   var svgGold = createSvg(goldContainer);
   var svgElexier = createSvg(elexierContainer);
   var svgDarkelexier = createSvg(darkelexierContainer);
 
   function createSvg(container) {
-    return d3.select(container)
+    return d3
+      .select(container)
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
@@ -287,66 +355,92 @@ async function createLineGraph(playerTag, goldContainer, elexierContainer, darke
   function processDataset(datasetString) {
     dataset = JSON.parse(datasetString.data);
 
-    var dateParts = datasetString.erstelldatum.split(' ')[0].split('-');
+    var dateParts = datasetString.erstelldatum.split(" ")[0].split("-");
     var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
 
     return {
       date: date.getTime(),
       gold: dataset.achievements[5].value,
       elexier: dataset.achievements[6].value,
-      darkelexier: dataset.achievements[16].value
+      darkelexier: dataset.achievements[16].value,
     };
   }
 
   var processedData = result.data.map(processDataset);
 
   // Extrahiere die Daten für Gold, Elexier und Dunklelexier
-  var goldData = processedData.map(d => ({ x: d.date, y: d.gold }));
-  var elexierData = processedData.map(d => ({ x: d.date, y: d.elexier }));
-  var darkelexierData = processedData.map(d => ({ x: d.date, y: d.darkelexier }));
+  var goldData = processedData.map((d) => ({ x: d.date, y: d.gold }));
+  var elexierData = processedData.map((d) => ({ x: d.date, y: d.elexier }));
+  var darkelexierData = processedData.map((d) => ({
+    x: d.date,
+    y: d.darkelexier,
+  }));
 
-  x.domain([processedData[0].date, processedData[processedData.length - 1].date]);
+  x.domain([
+    processedData[0].date,
+    processedData[processedData.length - 1].date,
+  ]);
 
   // Berechne die Domänen für jede Y-Achse separat
-  yGold.domain([0, d3.max(goldData, function(d) { return d.y; })]);
-  yElexier.domain([0, d3.max(elexierData, function(d) { return d.y; })]);
-  yDarkelexier.domain([0, d3.max(darkelexierData, function(d) { return d.y; })]);
+  yGold.domain([
+    0,
+    d3.max(goldData, function (d) {
+      return d.y;
+    }),
+  ]);
+  yElexier.domain([
+    0,
+    d3.max(elexierData, function (d) {
+      return d.y;
+    }),
+  ]);
+  yDarkelexier.domain([
+    0,
+    d3.max(darkelexierData, function (d) {
+      return d.y;
+    }),
+  ]);
 
-  svgGold.append("g")
+  svgGold
+    .append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
 
-  svgGold.append("g")
-    .call(d3.axisLeft(yGold).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
+  svgGold.append("g").call(d3.axisLeft(yGold).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
 
-  svgGold.append("path")
+  svgGold
+    .append("path")
     .datum(goldData)
     .attr("fill", "none")
     .attr("stroke", "gold")
     .attr("stroke-width", 1.5)
     .attr("d", lineGold);
 
-  svgElexier.append("g")
+  svgElexier
+    .append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
 
-  svgElexier.append("g")
-    .call(d3.axisLeft(yElexier).tickFormat(formatYAxis)); // format
-    svgElexier.append("path")
+  svgElexier.append("g").call(d3.axisLeft(yElexier).tickFormat(formatYAxis)); // format
+  svgElexier
+    .append("path")
     .datum(elexierData)
     .attr("fill", "none")
     .attr("stroke", "rgb(165, 31, 165)")
     .attr("stroke-width", 1.5)
     .attr("d", lineElexier);
 
-svgDarkelexier.append("g")
+  svgDarkelexier
+    .append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
 
-svgDarkelexier.append("g")
+  svgDarkelexier
+    .append("g")
     .call(d3.axisLeft(yDarkelexier).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
 
-svgDarkelexier.append("path")
+  svgDarkelexier
+    .append("path")
     .datum(darkelexierData)
     .attr("fill", "none")
     .attr("stroke", "rgb(10, 10, 56)")

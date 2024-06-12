@@ -185,14 +185,14 @@ if (isset($data["action"])) {
             if ($results < 1) {
                 $data = null;
                 $response[] = [
-                    'isOutdated' => $isOutdated,
-                    'data' => $data ? json_decode($data, true) : null
+                    "isOutdated" => $isOutdated,
+                    "data" => $data ? json_decode($data, true) : null
                 ];
                 echo json_encode(["status" => "success", "data" => $response]);
             }
 
             foreach ($results as $row) {
-                $lastRequest = $row['last_request'];
+                $lastRequest = $row["last_request"];
                 $isOutdated = true;
 
                 if ($lastRequest) {
@@ -212,7 +212,7 @@ if (isset($data["action"])) {
                                 ORDER BY api_requests.erstelldatum DESC
                                 LIMIT 1
                             ");
-                        $dataStmt->bind_param("i", $row['id']);
+                        $dataStmt->bind_param("i", $row["id"]);
                         $dataStmt->execute();
                         $dataStmt->bind_result($data);
                         $dataStmt->fetch();
@@ -225,10 +225,10 @@ if (isset($data["action"])) {
                 }
 
                 $response[] = [
-                    'id' => $row['id'],
-                    'name' => $row['name'],
-                    'isOutdated' => $isOutdated,
-                    'data' => $data ? json_decode($data, true) : null
+                    "id" => $row["id"],
+                    "name" => $row["name"],
+                    "isOutdated" => $isOutdated,
+                    "data" => $data ? json_decode($data, true) : null
                 ];
             }
             echo json_encode(["status" => "success", "data" => $response]);
@@ -394,14 +394,14 @@ if (isset($data["action"])) {
                     if ($data) {
                         $filteredData = [];
                         foreach ($data as $record) {
-                            $date = (new DateTime($record['erstelldatum']))->format('Y-m-d');
+                            $date = (new DateTime($record["erstelldatum"]))->format("Y-m-d");
                             if (!isset($filteredData[$date])) {
                                 $filteredData[$date] = $record;
                             }
                         }
 
                         usort($filteredData, function ($a, $b) {
-                            return strtotime($a['erstelldatum']) - strtotime($b['erstelldatum']);
+                            return strtotime($a["erstelldatum"]) - strtotime($b["erstelldatum"]);
                         });
 
                         echo json_encode([
@@ -465,9 +465,66 @@ if (isset($data["action"])) {
             mysqli_stmt_execute($stmt_update_password);
             echo json_encode(["status" => "success", "message" => "Password erfolgreich verändert"]);
         } else {
-            return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das ändern des Passworts."]);
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das ändern des Passworts."]);
         }
-    } else {
+    } else if ($action === "getAllIngameAccs") {
+
+        $user_id = $data["user_id"];
+        $sql_get_ingame = "SELECT * FROM user_ingame_relation WHERE user_id = ?";
+
+        if ($stmt_get_ingame = mysqli_prepare($conn, $sql_get_ingame)) {
+            mysqli_stmt_bind_param($stmt_get_ingame, "i", $user_id);
+            mysqli_stmt_execute($stmt_get_ingame);
+            $result = mysqli_stmt_get_result($stmt_get_ingame);
+
+            $data = [];
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $ingame_id = $row["ingame_id"];
+                $display_name = $row["display_name"];
+
+                // Abrufen des ingameschlüssels
+                $sql_get_ingameschlüssel = "SELECT ingameschlüssel FROM ingame WHERE id = ?";
+                if ($stmt_get_ingameschlüssel = mysqli_prepare($conn, $sql_get_ingameschlüssel)) {
+                    mysqli_stmt_bind_param($stmt_get_ingameschlüssel, "i", $ingame_id);
+                    mysqli_stmt_execute($stmt_get_ingameschlüssel);
+                    $result_ingameschlüssel = mysqli_stmt_get_result($stmt_get_ingameschlüssel);
+
+                    if ($row_ingameschlüssel = mysqli_fetch_assoc($result_ingameschlüssel)) {
+                        $ingameschlüssel = $row_ingameschlüssel["ingameschlüssel"];
+
+                        // Ergebnis dem Datenarray hinzufügen
+                        $data[] = [
+                            "ingame_id" => $ingame_id,
+                            "ingameschlüssel" => $ingameschlüssel,
+                            "display_name" => $display_name
+                        ];
+                    }
+                }
+            }
+
+            echo json_encode(["status" => "success", "message" => "Daten erfolgreich abgerufen", "data" => $data]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung."]);
+        }
+    } else if($action === "updateDisplayname"){
+        $newDisplayname = $data["newDisplayname"];
+        $ingame_id = $data["ingame_id"];
+        $user_id = $data["user_id"];
+
+        $sql_update_displayname = "UPDATE user_ingame_relation SET display_name = ? WHERE user_id = ? AND ingame_id = ?";
+        if ($stmt_update_displayname = mysqli_prepare($conn, $sql_update_displayname)){
+            mysqli_stmt_bind_param($stmt_update_displayname, "sii", $newDisplayname, $user_id, $ingame_id);
+            if (mysqli_stmt_execute($stmt_update_displayname)) {
+                echo json_encode(["status" => "success", "message" => "Displayname erfolgreich aktualisiert"]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Fehler beim Ausführen der SQL-Anweisung: " . mysqli_error($conn)]);
+            }
+        }else {
+            echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung."]);
+        }
+    }
+    else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
     }
 }

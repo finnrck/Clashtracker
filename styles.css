@@ -1250,3 +1250,63 @@ input:where([type="text"], [type="email"], [type="password"]) {
   padding: 1vh;
   box-sizing: border-box;
 }
+.ingameaccount-settings{
+  min-width: 70%;
+  background-color: var(--clr-main-600);
+  border: 1px solid var(--clr-main-200);
+  border-radius: 2vh;
+}
+.ingameaccount-settings .overflow{
+  margin-right: 1vw;
+}
+.ingame-settingcontainer{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid var(--clr-main-200);
+}
+.ingame-settingcontainer:last-child{
+  border: none;
+}
+.ingame-settingcontainer p{
+  color: var(--clr-main-200);
+  font-size: var(--fs-650);
+  margin: 2vh;
+}
+.ingame-setting-accountfield{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2vh;
+}
+.ingame-setting-accountdata input:disabled{
+  color: var(--clr-main-200);
+}
+.ingame-setting-accountdata input{
+  text-align: center;
+  width: 100%;
+}
+.ingame-setting-accountedit{
+  max-width: 4vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 2;
+}
+.ingame-setting-accountedit button{
+  border: none;
+  margin-right: 0.5vw;
+}
+.ingame-setting-accountedit button:hover{
+  cursor: pointer;
+}
+.ingame-setting-accountedit button:hover i {
+  color: var(--clr-accent-400);
+}
+
+.ingame-setting-accountedit .fa-pen-to-square, .fa-check, .fa-xmark{
+  background-color: var(--clr-main-600);
+  color: var(--clr-main-200);
+}

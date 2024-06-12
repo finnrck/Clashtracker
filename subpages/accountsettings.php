@@ -11,7 +11,7 @@ if ($user_data_array["status"] == "success") {
     echo "Fehler: " . $user_data_array["message"];
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $passwordAuth = $_POST["passwordAuth"];
     $newPW = $_POST["newpassword"];
     if (password_verify($passwordAuth, $user_data["password"])) {
@@ -116,6 +116,14 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
             </section>
             <section class="setting-block ingame-user-data-container">
                 <h2>Verbundene Ingamekonten</h2>
+                <div class="ingameaccount-settings">
+                    <div class="ingameaccount-box overflow" id="ingame-setting-datablock">
+                        <div class="spinner-box">
+                            <div class="spinner">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
 
@@ -160,10 +168,77 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
         const passwordAuth = document.getElementById("password-auth");
         const pwfailmassage = document.getElementById("failmassage");
 
+        async function loadIngameAccounts() {
+
+            let response = await displayAllIngameAccounts(userID);
+            document.getElementById("ingame-setting-datablock").innerHTML = response;
+
+            document.querySelectorAll(".edit-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    let container = button.closest(".ingame-settingcontainer");
+                    container.querySelector("input").disabled = false;
+                    container.querySelector(".edit-btn-box").classList.add("invisible");
+                    container.querySelector(".save-cancel-buttons").classList.remove("invisible");
+                });
+            });
+
+
+
+            document.querySelectorAll(".newdisplayname_input").forEach(input => {
+                input.addEventListener("keydown", function(event) {
+                    if (event.key === "Enter") {
+                        let container = input.closest(".ingame-settingcontainer");
+                        saveChanges(container.querySelector(".save-btn"));
+                    }
+                });
+            });
+
+            document.querySelectorAll(".save-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    saveChanges(button);
+                });
+            });
+
+            document.querySelectorAll(".cancel-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    let container = button.closest(".ingame-settingcontainer");
+                    let input = container.querySelector("input");
+                    input.value = input.getAttribute("data-original-value");
+                    input.disabled = true;
+                    container.querySelector(".save-cancel-buttons").classList.add("invisible");
+                    container.querySelector(".edit-btn-box").classList.remove("invisible");
+                });
+            });
+        }
+
+        async function saveChanges(button) {
+            let container = button.closest(".ingame-settingcontainer");
+            let ingame_id = container.getAttribute("data-ingame-id");
+            let input = container.querySelector("input");
+            input.disabled = true;
+            container.querySelector(".save-cancel-buttons").classList.add("invisible");
+            container.querySelector(".edit-btn-box").classList.remove("invisible");
+
+            let newDisplayname = input.value;
+            if (newDisplayname.length < 4){
+                input.value = input.getAttribute("data-original-value");
+            }else {
+                var response = await updateDisplayname(newDisplayname, ingame_id, userID);
+            if (response.status != "success"){
+                input.value = input.getAttribute("data-original-value");
+                console.log(response.message);
+            }else {
+                input.setAttribute("data-original-value", input.value);
+            }
+            }
+        }
+
         function loadUserData() {
-            displayname.value = "<?php echo $user_data["displayname"]; ?>";
-            username.value = "<?php echo $user_data["username"]; ?>";
-            email.value = "<?php echo $user_data["email"]; ?>";
+            displayname.value = displaynameValue;
+            username.value = usernameValue;
+            email.value = emailValue;
+
+            loadIngameAccounts();
         }
         window.onload = loadUserData();
 
@@ -276,7 +351,7 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
                     console.log(response);
                 },
                 error: function(xhr, status, error) {
-                    console.error('Fehler:', error);
+                    console.error("Fehler:", error);
                 }
             })
 
