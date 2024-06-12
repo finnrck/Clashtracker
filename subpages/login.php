@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             !preg_match("/\d/", $password) ||
             !preg_match("/[^a-zA-Z\d]/", $password)
         ) {
-            $response["message"] = "Registrierung fehlgeschlagen! Das Passwort muss mindestens 6 Zeichen lang sein (mindestens: 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl & 1 Sonderzeichen";
+            $response["message"] = "Registrierung fehlgeschlagen! Passwort muss 6 Zeichen lang sein (min.: 1x( G ; g ; 0 ; ! )";
             echo json_encode($response);
             exit();
         }

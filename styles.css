@@ -730,6 +730,8 @@ input:where([type="text"], [type="email"], [type="password"]) {
   justify-content: center;
 }
 .failmassage-box p{
+  align-self: center;
+  justify-self: center;
   margin: 1.5vh;
   padding: 1vh;
   border-radius: 5px;
@@ -1251,6 +1253,7 @@ input:where([type="text"], [type="email"], [type="password"]) {
   box-sizing: border-box;
 }
 .ingameaccount-settings{
+  min-height: 20vh;
   min-width: 70%;
   background-color: var(--clr-main-600);
   border: 1px solid var(--clr-main-200);
@@ -1322,4 +1325,9 @@ input:where([type="text"], [type="email"], [type="password"]) {
 }
 .delete-ingame-box button:hover{
   background-color: var(--clr-accent-300);
+}
+.noingameAccs{
+  margin-top: 4vh;
+  text-align: center;
+  font-size: var(--fs-600);
 }

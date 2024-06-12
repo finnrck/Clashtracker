@@ -185,7 +185,12 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
         async function loadIngameAccounts() {
 
             let response = await displayAllIngameAccounts(userID);
-            document.getElementById("ingame-setting-datablock").innerHTML = response;
+
+            if(response.length < 1){
+                document.getElementById("ingame-setting-datablock").innerHTML = `<div class="noingameAccs"><p>Keine verbundenen Ingame-Konten gefunden</p></div>`;
+            }else{
+                document.getElementById("ingame-setting-datablock").innerHTML = response;
+            }            
 
             document.querySelectorAll(".edit-btn").forEach(button => {
                 button.addEventListener("click", function() {
