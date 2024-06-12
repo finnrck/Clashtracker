@@ -82,10 +82,10 @@ unset($_SESSION["failmessage"]);
             let inputvalue = input.value;
             if (inputvalue.length > 5) {
                 if (clanButton.classList.contains("active")) {
-                    const url = "/subpages/searchinformation/clan.php/?id=" + encodeURIComponent(inputvalue);
+                    const url = "/subpages/searchinformation/clan.php/?tag=" + encodeURIComponent(inputvalue);
                     window.location.href = url;
                 } else if (playerButton.classList.contains("active")) {
-                    const url = "/subpages/searchinformation/player.php/?id=" + encodeURIComponent(inputvalue);
+                    const url = "/subpages/searchinformation/player.php/?tag=" + encodeURIComponent(inputvalue);
                     window.location.href = url;
                 } else {
                     console.error("Unerwarteter Fehler: Kein Button Aktiv");

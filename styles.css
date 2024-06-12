@@ -1306,7 +1306,20 @@ input:where([type="text"], [type="email"], [type="password"]) {
   color: var(--clr-accent-400);
 }
 
-.ingame-setting-accountedit .fa-pen-to-square, .fa-check, .fa-xmark{
+.ingame-setting-accountedit i{
   background-color: var(--clr-main-600);
   color: var(--clr-main-200);
+}
+.delete-ingame-box{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+}
+.delete-ingame-box p{
+  color: var(--clr-main-200);
+  font-size: var(--fs-600);
+}
+.delete-ingame-box button:hover{
+  background-color: var(--clr-accent-300);
 }

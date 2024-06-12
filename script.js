@@ -12,6 +12,15 @@ const searchinput = document.getElementById("search-input");
 const changePassword = document.getElementById("change-password");
 const passwordButton = document.getElementById("password-openbutton");
 const settings = document.getElementById("settings");
+const deleteIngame = document.getElementById("delete-ingame");
+const deleteIngamebtn = document.getElementById("delete-closeing-btn");
+
+if (deleteIngame && deleteIngamebtn){
+  deleteIngamebtn.addEventListener("click", () => {
+    deleteIngame.classList.add("invisible");
+    settings.classList.remove("blur");
+  });
+}
 
 if (changePassword && passwordButton) {
   passwordButton.addEventListener("click", () => {

@@ -21,10 +21,28 @@ async function updateUserData(user_id, newDisplayname, newUsername) {
       return response;
     } else {
       console.log(response);
-      console.error("Fehler beim Einfügen des Accounts:", response.message);
+      console.error("Fehler beim aktualisieren der daten:", response.message);
       return response;
     }
   });
+}
+
+async function deleteIngameConnection(password, user_id, ingame_id){
+  const data = {
+    password: password,
+    user_id: user_id,
+    ingame_id: ingame_id
+  }
+  return await sendRequest("deleteIngameConnection", data).then((response) => {
+    if (response.status === "success") {
+      return response;
+    } else {
+      console.log(response);
+      console.error("Fehler beim entfernen der Ingameverbindung:", response.message);
+      return response;
+    }
+  });
+
 }
 
 async function updateDisplayname(inputvalue, ingame_id, user_id) {
@@ -49,7 +67,7 @@ async function displayAllIngameAccounts(user_id) {
       response.data.forEach((item) => {
         html += `
                 <div class="ingame-settingcontainer" data-ingame-id="${item.ingame_id}">
-                    <p>#${item.ingameschlüssel}</p>
+                    <p class="ingameKey" data-ingameKey="${item.ingameschlüssel}">#${item.ingameschlüssel}</p>
                     <div class="ingame-setting-accountfield">
                         <div class="ingame-setting-accountdata">
                             <input class="newdisplayname_input" type="text" value="${item.display_name}" disabled data-original-value="${item.display_name}">
@@ -57,6 +75,7 @@ async function displayAllIngameAccounts(user_id) {
                         <div class="ingame-setting-accountedit">
                             <div class="edit-btn-box">
                                 <button class="edit-btn"><i class="fa-solid fa-pen-to-square fa-lg"></i></button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash fa-lg"></i></button>
                             </div>
                             <div class="save-cancel-buttons invisible">
                                 <button class="save-btn"><i class="fa-solid fa-check fa-lg"></i></button>

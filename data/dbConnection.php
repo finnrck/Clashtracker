@@ -267,11 +267,6 @@ if (isset($data["action"])) {
             exit;
         }
     } elseif ($action === "getOldData") {
-        $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-        if (!$conn) {
-            die("Verbindung zur Datenbank fehlgeschlagen: " . mysqli_connect_error());
-        }
         $tag = $data["tag"];
         $inputDate = $data["input"];
 
@@ -507,24 +502,51 @@ if (isset($data["action"])) {
         } else {
             echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung."]);
         }
-    } else if($action === "updateDisplayname"){
+    } else if ($action === "updateDisplayname") {
         $newDisplayname = $data["newDisplayname"];
         $ingame_id = $data["ingame_id"];
         $user_id = $data["user_id"];
 
         $sql_update_displayname = "UPDATE user_ingame_relation SET display_name = ? WHERE user_id = ? AND ingame_id = ?";
-        if ($stmt_update_displayname = mysqli_prepare($conn, $sql_update_displayname)){
+        if ($stmt_update_displayname = mysqli_prepare($conn, $sql_update_displayname)) {
             mysqli_stmt_bind_param($stmt_update_displayname, "sii", $newDisplayname, $user_id, $ingame_id);
             if (mysqli_stmt_execute($stmt_update_displayname)) {
                 echo json_encode(["status" => "success", "message" => "Displayname erfolgreich aktualisiert"]);
             } else {
                 echo json_encode(["status" => "error", "message" => "Fehler beim Ausführen der SQL-Anweisung: " . mysqli_error($conn)]);
             }
-        }else {
+        } else {
             echo json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung."]);
         }
-    }
-    else {
+    } else if ($action === "deleteIngameConnection") {
+        $password = $data["password"];
+        $user_id = $data["user_id"];
+        $ingame_id = $data["ingame_id"];
+
+        $sql = "SELECT * FROM users WHERE id = ?";
+
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if (mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            if (password_verify($password, $row["password"])) {
+
+                $sql_delete = "DELETE FROM user_ingame_relation WHERE user_id = ? AND ingame_id = ?;";
+                $stmt_delete = mysqli_prepare($conn, $sql_delete);
+                mysqli_stmt_bind_param($stmt_delete, "ii", $user_id, $ingame_id);
+                if (mysqli_stmt_execute($stmt_delete)){
+                    echo json_encode(["status" => "success", "message" => "Erfolgreich"]);
+                }
+            } else {
+                echo json_encode(["status" => "error", "message" => "Falsches Passwort"]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Benutzer konnte nicht gefunden"]);
+        }
+    } else {
         echo json_encode(["status" => "error", "message" => "Ungültige Aktion"]);
     }
 }
@@ -563,30 +585,4 @@ function getUserData($user_id)
     }
     mysqli_close($conn);
 }
-function updatePassword($newPW, $user_id)
-{
-    //TODO connection fehler idk
-    global $servername, $username, $password, $dbname;
-    $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-    return json_encode(["status" => "error", "message" => $password]);
-
-    if (!$conn) {
-        return json_encode(["status" => "error", "message" => "Verbindung zur Datenbank fehlgeschlagen: " . mysqli_connect_error()]);
-    }
-
-    $hasedPassword = password_hash($newPW, PASSWORD_DEFAULT);
-
-    $sql_update_password = "UPDATE users SET password = ? WHERE id = ?;";
-    if ($stmt_update_password = mysqli_prepare($conn, $sql_update_password)) {
-        mysqli_stmt_bind_param($stmt_update_password, "si", $hasedPassword, $user_id);
-        mysqli_stmt_execute($stmt_update_password);
-    } else {
-        return json_encode(["status" => "error", "message" => "Fehler beim Vorbereiten der SQL-Anweisung für das ändern des Passworts."]);
-    }
-
-    mysqli_close($conn);
-}
-
-
 mysqli_close($conn);

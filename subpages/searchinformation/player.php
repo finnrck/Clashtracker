@@ -11,6 +11,18 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])){
     });
     </script>";
 }   //TODO erstellen spielersuche
+
+if(isset($_GET["tag"])) {
+    $tag = $_GET["tag"];
+
+    if (strpos($tag, "#") === 0) {
+        $tag = substr($tag, 1);
+    }
+
+} else {
+    header("Location: ../../../index.php");
+}
+
 ?>
 <head>
     <meta charset="UTF-8" />

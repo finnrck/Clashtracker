@@ -148,6 +148,20 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
             </div>
         </div>
     </div>
+    <div id="delete-ingame" class="add-acc invisible">
+        <div class="add-acc-header">
+            <h1>Accountverbindung Löschen</h1>
+            <button id="delete-closeing-btn"><i id="closing-acc" class="fa-solid fa-xmark fa-4x"></i></button>
+        </div>
+        <div class="acc-inputbox delete-ingame-box">
+            <p>Zum Löschen der Konto-Verbindung mit Passwort bestätigen</p>
+            <p data-ingame-id="" id="delete-ingameID"></p>
+            <input id="delete-pwcheck" type="password" placeholder="Passwort" required>
+            <button id="delete-ingameBtn" class="button">Bestätigen</button>
+            <div id="delete-failmessage">
+            </div>
+        </div>
+    </div>
 
     <?php
     echo $footer;
@@ -182,8 +196,6 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
                 });
             });
 
-
-
             document.querySelectorAll(".newdisplayname_input").forEach(input => {
                 input.addEventListener("keydown", function(event) {
                     if (event.key === "Enter") {
@@ -209,6 +221,23 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
                     container.querySelector(".edit-btn-box").classList.remove("invisible");
                 });
             });
+
+            document.querySelectorAll(".delete-btn").forEach(button => {
+                button.addEventListener("click", function() {
+                    console.log("test");
+                    let container = button.closest(".ingame-settingcontainer");
+                    let ingame_id = container.getAttribute("data-ingame-id");
+                    let ingameKeyfield = container.querySelector(".ingameKey");
+                    let ingameKey = ingameKeyfield.getAttribute("data-ingameKey");
+                    let input = container.querySelector("input");
+                    let displayname = input.getAttribute("data-original-value");
+                    document.getElementById("delete-ingameID").innerText = "Verbindung zu " + displayname + " ( #" + ingameKey + " ) " + " wird gelöscht!";
+                    document.getElementById("delete-ingameID").setAttribute("data-ingame-id", ingame_id);
+
+                    document.getElementById("delete-ingame").classList.remove("invisible");
+                    document.getElementById("settings").classList.add("blur");
+                })
+            });
         }
 
         async function saveChanges(button) {
@@ -220,16 +249,16 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
             container.querySelector(".edit-btn-box").classList.remove("invisible");
 
             let newDisplayname = input.value;
-            if (newDisplayname.length < 4){
+            if (newDisplayname.length < 4) {
                 input.value = input.getAttribute("data-original-value");
-            }else {
+            } else {
                 var response = await updateDisplayname(newDisplayname, ingame_id, userID);
-            if (response.status != "success"){
-                input.value = input.getAttribute("data-original-value");
-                console.log(response.message);
-            }else {
-                input.setAttribute("data-original-value", input.value);
-            }
+                if (response.status != "success") {
+                    input.value = input.getAttribute("data-original-value");
+                    console.log(response.message);
+                } else {
+                    input.setAttribute("data-original-value", input.value);
+                }
             }
         }
 
@@ -361,6 +390,30 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
 
             console.log("schauen wie mal was wird");
         });
+
+        document.getElementById("delete-ingameBtn").addEventListener("click", async function (event) {
+
+            var ingame_id = document.getElementById("delete-ingameID").getAttribute("data-ingame-id");
+            var pwcheck = document.getElementById("delete-pwcheck").value;
+            var failmessage = document.getElementById("delete-failmessage");
+
+            if (pwcheck.length < 1){
+                failmessage.innerText = "Ungültiges Passwort";
+                failmessage.style.color = "hsl(12, 88%, 59%)";
+                return;
+            }
+            var response = await deleteIngameConnection(pwcheck, userID, ingame_id);
+
+            if (response.status == "success"){
+                failmessage.innerText = "Erfolgreich gelöscht!"
+                failmessage.style.color = "green";
+                loadUserData();
+            }else{
+                failmessage.innerText = response.message;
+                failmessage.style.color = "hsl(12, 88%, 59%)";
+            }
+        });
+
     </script>
 </body>
 

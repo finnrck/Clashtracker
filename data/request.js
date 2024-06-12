@@ -10,7 +10,6 @@ function makeApiRequest(url) {
           resolve(data.result);
           return data.result;
         }
-        //datenverarbeitung
       })
       .catch((error) => {
         console.log("Fehler bei der API-Anfrage:", error);
