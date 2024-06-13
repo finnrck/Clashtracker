@@ -451,7 +451,7 @@ $ingameKey = isset($_SESSION["ingameKey"]) ? $_SESSION["ingameKey"] : "Noch kein
                     dropdown1.classList.add("invisible"); // Menü verstecken außerhalb des Inputfeldes geklickt 
                 }
                 if (!event.target.matches("#input2")) {
-                    dropdown2.classList.add("invisible"); // Menü verstecken außerhalb des Inputfeldes geklickt 
+                    dropdown2.classList.add("invisible");
                 }
             });
         }

@@ -110,8 +110,6 @@ document.getElementById("Logout-button").addEventListener("click", function () {
   xhr.open("POST", "/subpages/logout.php", true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === XMLHttpRequest.DONE) {
-      // Weiterleitung oder andere Aktionen nach dem Beenden der Session
-      // Hier können Sie den Benutzer z.B. auf eine andere Seite weiterleiten
       window.location.href = "/index.php";
     }
   };

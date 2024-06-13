@@ -10,7 +10,7 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
         document.getElementById(\"login-button\").classList.remove(\"visible\");
     });
     </script>";
-}   //TODO erstellen clansuche
+}
 
 if (isset($_GET["tag"])) {
     $tag = $_GET["tag"];

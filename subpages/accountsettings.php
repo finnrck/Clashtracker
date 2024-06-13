@@ -75,8 +75,6 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
                 <h2>Account Daten</h2>
                 <div>
                     <form class="userSetting-form" id="userSettings">
-                        <!-- TODO UserSettings -->
-                        <!-- über js aus db holen und manuel laden $_SESSION["id"] nutzen um dafür alle daten abzurufen-->
                         <div class="user-data-block">
                             <p>Anzeigename:</p>
                             <input type="text" id="displayname" value="">

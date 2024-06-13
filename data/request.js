@@ -209,8 +209,7 @@ async function getRanking() {
     // Verwende die Daten aus der Datenbank, um HTML zu generieren
     // (upToDateData enthält die aktuellen Ranglisten-Daten)
     upToDateData.forEach((data, index) => {
-      const items = data.data.items; // Zugriff auf das "items" Array
-      console.log(items); // Überprüfen, ob das "items" Array die erwarteten Clan-Daten enthält
+      const items = data.data.items;
       dataKey = dataKeys[index];
 
       html += `<div class="ranking-list">

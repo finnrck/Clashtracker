@@ -735,7 +735,7 @@ function createHtmlforDisplay(element, view) {
             <div>
                 <p class="split-data-p">Name: ${element.clan.name || '-'}</p>
                 <p class="split-data-p">Clanschlüssel: ${element.clan.tag || '-'}</p>
-                <p class="split-data-p">Level: ${element.clanLevel || '-'}</p>
+                <p class="split-data-p">Level: ${element.clan.clanLevel || '-'}</p>
             </div>
         </div>
         <div>
