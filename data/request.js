@@ -25,6 +25,19 @@ async function getPlayerApiData(playerID) {
     return response;
   } catch (error) {
     console.error("Fehler beim Parsen der JSON-Antwort:", error);
+    return "failed";
+  }
+}
+
+async function getClanApiData(clanID) {
+  try {
+    const response = await makeApiRequest(
+      "https://api.clashofclans.com/v1/clans/%23" + clanID
+    );
+    return response;
+  } catch (error) {
+    console.error("Fehler beim Parsen der JSON-Antwort:", error);
+    return "failed";
   }
 }
 

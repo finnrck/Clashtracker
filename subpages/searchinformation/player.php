@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "../../templates.php";
-if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])){
+if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])) {
     echo "<script>
     document.addEventListener(\"DOMContentLoaded\", function() {
         document.getElementById(\"loggedin\").classList.add(\"visible\");
@@ -12,18 +12,20 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["displayname"])){
     </script>";
 }   //TODO erstellen spielersuche
 
-if(isset($_GET["tag"])) {
+if (isset($_GET["tag"])) {
     $tag = $_GET["tag"];
 
     if (strpos($tag, "#") === 0) {
         $tag = substr($tag, 1);
     }
-
 } else {
     header("Location: ../../../index.php");
 }
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>Spielerinfo</title>
@@ -33,18 +35,34 @@ if(isset($_GET["tag"])) {
     <script src="https://kit.fontawesome.com/b2c4ecfb6d.js" crossorigin="anonymous"></script>
     <script src="/script.js" defer></script>
     <script src="/data/request.js"></script>
+    <script src="/data/dbaction.js"></script>
 </head>
 
 <body>
-<?php
+    <?php
     echo $header;
     ?>
-    <main class="padding-block-1200">
-        <div class="padding-block-1200 text-center">
-            WIP
+    <main>
+        <div id="test" class="displayPlayerData-fpsearch">
+            <div class="spinner-box">
+                <div class="spinner">
+                </div>
+            </div>
         </div>
     </main>
     <?php
     echo $footer;
     ?>
+
+    <script>
+        var ingameKey = "<?php echo $tag ?>";
+
+        async function loadData() {
+            document.getElementById("test").innerHTML = await displayAccSearch(ingameKey);
+        }
+
+        window.onload = loadData;
+    </script>
 </body>
+
+</html>

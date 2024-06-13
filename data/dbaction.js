@@ -467,6 +467,28 @@ async function createLineGraph(
     .attr("d", lineDarkelexier);
 }
 
+async function displayAccSearch(ingameKey){
+
+  const playerData = await getPlayerApiData(ingameKey);
+  
+  if (playerData == "failed"){
+    return `<div class="noPlayerFound">Kein Spieler mit dieser ID gefunden!</div>`;
+  }else{
+    return createHtmlforDisplay(playerData, "fpsearch")
+  }
+}
+
+async function displayClanSearch(ingameKey){
+
+  const clanData = await getClanApiData(ingameKey);
+  
+  if (clanData == "failed"){
+    return `<div class="noPlayerFound">Kein Clan mit dieser ID gefunden!</div>`;
+  }else{
+    return createClanHtmlforDisplay(clanData)
+  }
+}
+
 function createHtmlforDisplay(element, view) {
   var view = view;
   var html = "";
@@ -477,9 +499,6 @@ function createHtmlforDisplay(element, view) {
   let townHallWeaponLevel = element.townHallWeaponLevel;
   let spells = splitArray(element.spells);
   let achievements = splitArray(element.achievements);
-  if (townHallWeaponLevel == undefined) {
-    townHallWeaponLevel = "-";
-  }
   if (warPreference == "in") {
     warPreference = "nimmt teil";
   } else {
@@ -494,26 +513,26 @@ function createHtmlforDisplay(element, view) {
   html += `
     <div class="centered-data border">
       <div class="centered-data-header">
-        <h1>Ingamename: ${element.name} </h1>
-        <h2>(${element.tag})</h2>
+        <h1>Ingamename: ${element.name || '-'} </h1>
+        <h2>(${element.tag || '-'})</h2>
       </div>
       <div class="split"></div> `;
-  if (view == "split") {
+  if (view == "split" || view == "fpsearch") {
     html += `
       <div class="centered-data-statusdata">
         <h3 class="subheading">Stats</h3>
         <p class="split-data-p"><i id="level" class="fa-solid fa-splotch"></i> Level: ${
-          element.expLevel
+          element.expLevel || '-'
         }</p>
         <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(
           gold
-        )}</p>
+        ) || '-'}</p>
         <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(
           elexier
-        )}</p>
+        ) || '-'}</p>
         <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(
           darkelex
-        )}</p>
+        ) || '-'}</p>
       </div>`;
   } else {
     createLineGraph(
@@ -531,13 +550,13 @@ function createHtmlforDisplay(element, view) {
           }</p>
           <p class="split-data-p"><i id="gold" class="fa-solid fa-coins"></i> Erbeutetes Gold: ${formatNumberWithDots(
             gold
-          )}</p>
+          ) || '-'}</p>
           <p class="split-data-p"><i id="elexier" class="fa-solid fa-droplet"></i> Erbeutetes Elexier: ${formatNumberWithDots(
             elexier
-          )}</p>
+          ) || '-'}</p>
           <p class="split-data-p"><i id="dukleselexier" class="fa-solid fa-droplet"></i> Erbeutetes Dunkleselexier: ${formatNumberWithDots(
             darkelex
-          )}</p>
+          ) || '-'}</p>
         </div>
         <div class="graph-data-section">
           <div class="graph-container">
@@ -556,16 +575,16 @@ function createHtmlforDisplay(element, view) {
       <div class="split"></div>
       <div class="mainvillage">
         <h3 class="subheading">Hauptdorf</h3>
-        <p class="split-data-p text-center underlined">Rathauslevel: ${element.townHallLevel}</p>
-        <p class="split-data-p text-center">Rathausverteidigung: ${townHallWeaponLevel}</p>
+        <p class="split-data-p text-center underlined">Rathauslevel: ${element.townHallLevel || '-'}</p>
+        <p class="split-data-p text-center">Rathausverteidigung: ${townHallWeaponLevel || '-'}</p>
         <div class="mainviliage-overview">
             <div class="display-overview">
-                <p class="split-data-p">gewonnene Verteidigungen: ${element.defenseWins}</p>
-                <p class="split-data-p">gewonnene Angriffe: ${element.attackWins}</p>
+                <p class="split-data-p">gewonnene Verteidigungen: ${element.defenseWins || '-'}</p>
+                <p class="split-data-p">gewonnene Angriffe: ${element.attackWins || '-'}</p>
             </div>
             <div class="display-overview">
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${element.trophies}</p>
-                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${element.bestTrophies}</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäen: ${element.trophies || '-'}</p>
+                <p class="split-data-p"><i class="fa-solid fa-trophy"></i>  Trophäenrekord: ${element.bestTrophies || '-'}</p>
             </div>
         </div> `;
   if (view == "split") {
@@ -664,19 +683,19 @@ function createHtmlforDisplay(element, view) {
             <div>
                 <p class="split-data-p text-center">Tropähen</p>
                 <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${
-                  element.builderBaseTrophies
+                  element.builderBaseTrophies || '-'
                 }</p>
             </div>
             <div>
                 <p class="split-data-p text-center">Liga</p>
                 <p class="split-data-p text-center">${
-                  element.builderBaseLeague.name
+                  element.builderBaseLeague.name || '-'
                 }</p>
             </div>
             <div>
                 <p class="split-data-p text-center">Trophäenrekord</p>
                 <p class="split-data-p text-center"><i class="fa-solid fa-trophy"></i>  ${
-                  element.bestBuilderBaseTrophies
+                  element.bestBuilderBaseTrophies || '-'
                 }</p>
             </div>
         </div>
@@ -686,19 +705,19 @@ function createHtmlforDisplay(element, view) {
                 <div>
                     <p class="split-data-p underlined">Kampfmaschine: </p>
                     <p class="split-data-p">Level: ${
-                      element.existingHeroes[4].level
+                      element.existingHeroes[4].level || '-'
                     }</p>
                     <p class="split-data-p">maxLevel: ${
-                      element.existingHeroes[4].maxLevel
+                      element.existingHeroes[4].maxLevel || '-'
                     }</p>
                 </div>
                 <div>
                     <p class="split-data-p underlined">Kampfschrauber: </p>
                     <p class="split-data-p">Level: ${
-                      element.existingHeroes[5].level
+                      element.existingHeroes[5].level || '-'
                     }</p>
                     <p class="split-data-p">maxLevel: ${
-                      element.existingHeroes[5].maxLevel
+                      element.existingHeroes[5].maxLevel || '-'
                     }</p>
                 </div>
             </div>
@@ -714,9 +733,9 @@ function createHtmlforDisplay(element, view) {
                 }" alt="Clan Badge">
             </div>
             <div>
-                <p class="split-data-p">Name: ${element.clan.name}</p>
-                <p class="split-data-p">Clanschlüssel: ${element.clan.tag}</p>
-                <p class="split-data-p">Level: ${element.clanLevel}</p>
+                <p class="split-data-p">Name: ${element.clan.name || '-'}</p>
+                <p class="split-data-p">Clanschlüssel: ${element.clan.tag || '-'}</p>
+                <p class="split-data-p">Level: ${element.clanLevel || '-'}</p>
             </div>
         </div>
         <div>
@@ -724,19 +743,19 @@ function createHtmlforDisplay(element, view) {
                 <p class="split-data-p">Rolle: ${element.role}</p>
                 <p class="split-data-p">Clanstadtbeitrag: ${formatNumberWithDots(
                   element.clanCapitalContributions
-                )}</p>
+                ) || '-'}</p>
             </div>
             <div class="clan-splitdata-overview">
                 <div>
-                    <p class="split-data-p">Spenden: ${element.donations}</p>
+                    <p class="split-data-p">Spenden: ${element.donations || '-'}</p>
                     <p class="split-data-p">erhaltene Spenden: ${
-                      element.donationsReceived
+                      element.donationsReceived || '-'
                     }</p>
                 </div>
                 <div>
-                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Klankriege: ${warPreference}</p>
+                    <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Klankriege: ${warPreference || '-'}</p>
                     <p class="split-data-p"><i id="star" class="fa-solid fa-star"></i>  Kriegssterne: ${
-                      element.warStars
+                      element.warStars || '-'
                     }</p>
                 </div>
             </div>
@@ -752,11 +771,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (troop) => `
                       <li class="split-data-list-item">
-                        <p>${troop.name}</p>
-                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                        <p>${troop.name || '-'}</p>
+                        <p>Level: ${troop.level || '-'} / ${troop.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -765,11 +784,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (troop) => `
                       <li class="split-data-list-item">
-                        <p>${troop.name}</p>
-                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                        <p>${troop.name || '-'}</p>
+                        <p>Level: ${troop.level || '-'} / ${troop.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
         </div>
@@ -784,11 +803,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (spell) => `
                       <li class="split-data-list-item">
-                        <p>${spell.name}</p>
-                        <p>Level: ${spell.level} / ${spell.maxLevel}</p>
+                        <p>${spell.name || '-'}</p>
+                        <p>Level: ${spell.level || '-'} / ${spell.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -797,11 +816,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (spell) => `
                       <li class="split-data-list-item">
-                        <p>${spell.name}</p>
-                        <p>Level: ${spell.level} / ${spell.maxLevel}</p>
+                        <p>${spell.name || '-'}</p>
+                        <p>Level: ${spell.level || '-'} / ${spell.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
         </div>
@@ -816,11 +835,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (troop) => `
                       <li class="split-data-list-item">
-                        <p>${troop.name}</p>
-                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                        <p>${troop.name || '-'}</p>
+                        <p>Level: ${troop.level || '-'} / ${troop.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -829,11 +848,11 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (troop) => `
                       <li class="split-data-list-item">
-                        <p>${troop.name}</p>
-                        <p>Level: ${troop.level} / ${troop.maxLevel}</p>
+                        <p>${troop.name || '-'}</p>
+                        <p>Level: ${troop.level || '-'} / ${troop.maxLevel || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
         </div>
@@ -848,13 +867,13 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (achievement) => `
                       <li class="split-data-list-item">
-                        <p>${achievement.name}</p>
-                        <p>Sterne: ${achievement.stars} / 3</p>
-                        <p>Info: ${achievement.info} </p>
-                        <p>${achievement.value} / ${achievement.target}</p>
+                        <p>${achievement.name || '-'}</p>
+                        <p>Sterne: ${achievement.stars || '-'} / 3</p>
+                        <p>Info: ${achievement.info || '-'} </p>
+                        <p>${achievement.value || '-'} / ${achievement.target || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
             <div class="mainvillage-troops">
@@ -863,17 +882,86 @@ function createHtmlforDisplay(element, view) {
                   .map(
                     (achievement) => `
                       <li class="split-data-list-item">
-                        <p>${achievement.name}</p>
-                        <p>Sterne: ${achievement.stars} / 3</p>
-                        <p>Info: ${achievement.info} </p>
-                        <p>${achievement.value} / ${achievement.target}</p>
+                        <p>${achievement.name || '-'}</p>
+                        <p>Sterne: ${achievement.stars || '-'} / 3</p>
+                        <p>Info: ${achievement.info || '-'} </p>
+                        <p>${achievement.value || '-'} / ${achievement.target || '-'}</p>
                     `
                   )
-                  .join("")}
+                  .join("") || '-'}
               </ul>
             </div>
         </div>
     </div>
 </div>`;
+  return html;
+}
+
+function createClanHtmlforDisplay(clanData){
+  const data = clanData;
+  var html = "";
+  html += `
+  <div class="centered-data border">
+    <img class="clan-badge" src="${data.badgeUrls.medium}" alt="Clan Badge">
+    <div class="centered-data-header">
+      <h1>Clanname: ${data.name || '-'}</h1>
+      <h2>(${data.tag || '-'})</h2>
+    </div>
+    <div class="split"></div>
+    <div class="clan-overview">
+      <div>
+        <h3>Allgemeine Informationen</h3>
+        <p>Beschreibung: ${data.description || '-'}</p>
+        <p>Clan-Level: ${data.clanLevel || '-'}</p>
+        <p>Clan-Punkte: ${data.clanPoints || '-'}</p>
+        <p>Builder Base Punkte: ${data.clanBuilderBasePoints || '-'}</p>
+        <p>Clan Hauptstadt Punkte: ${data.clanCapitalPoints || '-'}</p>
+        <p>Familienfreundlich: ${data.isFamilyFriendly !== undefined ? (data.isFamilyFriendly ? "Ja" : "Nein") : '-'}</p>
+      </div>
+      <div>
+        <h3>Anforderungen und Einstellungen</h3>
+        <p>Benötigte Trophäen: ${data.requiredTrophies || '-'} <i class="fa-solid fa-trophy"></i></p>
+        <p>Benötigte Nachtdorf-Trophäen: ${data.requiredBuilderBaseTrophies || '-'} <i class="fa-solid fa-trophy"></i></p>
+        <p>Benötigtes Rathauslevel: ${data.requiredTownhallLevel || '-'}</p>
+        <p>Chatsprache: ${data.chatLanguage && data.chatLanguage.name || '-'}</p>
+      </div>
+    </div>
+    <div class="split"></div>
+    <div class="clan-overview">
+      <div>
+        <h3>Kriegsstatistiken</h3>
+        <p>Kriegsfrequenz: ${data.warFrequency || '-'}</p>
+        <p>Siegesserie: ${data.warWinStreak || '-'}</p>
+        <p>Kriegsgewinne: ${data.warWins || '-'}</p>
+        <p>Kriegsniederlagen: ${data.warLosses || '-'}</p>
+        <p>Kriegsunentschieden: ${data.warTies || '-'}</p>
+        <p>Kriegsliga: ${data.warLeague && data.warLeague.name || '-'}</p>
+      </div>
+      <div>
+        <h3>Clan Capital</h3>
+        <p>Hauptstadt Level: ${data.clanCapital && data.clanCapital.capitalHallLevel || '-'}</p>
+        <p>Distrikte:</p>
+        <ul>
+          ${data.clanCapital && data.clanCapital.districts ? data.clanCapital.districts.map(district => `<li>${district.name} (Level ${district.districtHallLevel})</li>`).join('') : '-'}
+        </ul>
+      </div>
+    </div>
+    <div class="split"></div>
+    <div class="clan-overview">
+      <div>
+        <h3>Mitgliederinformationen</h3>
+        <p>Anzahl der Mitglieder: ${data.members || '-'}</p>
+        <p>Clanführer: ${data.memberList && data.memberList.find(member => member.role === "leader") ? data.memberList.find(member => member.role === "leader").name : '-'}</p>
+      </div>
+      <div>
+        <h3>Labels</h3>
+        <ul>
+          ${data.labels ? data.labels.map(label => `<li>${label.name} <img src="${label.iconUrls.small}" alt="${label.name}"></li>`).join('') : '-'}
+        </ul>
+      </div>
+    </div>
+  </div>
+  `;
+
   return html;
 }

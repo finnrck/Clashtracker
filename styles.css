@@ -1331,3 +1331,42 @@ input:where([type="text"], [type="email"], [type="password"]) {
   text-align: center;
   font-size: var(--fs-600);
 }
+/* frontpage search */
+.displayPlayerData-fpsearch{
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5vh;
+  margin-left: 5vw;
+  margin-right: 5vw;
+}
+.noPlayerFound{
+  font-size: var(--fs-700);
+  color: var(--clr-accent-400);
+}
+.clan-overview {
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.clan-overview h3 {
+  font-size: var(--fs-650);
+}
+.clan-overview p, .clan-overview ul {
+  margin: 1vh;
+}
+.clan-overview ul {
+  list-style-type: none;
+  padding: 0.5vh;
+}
+.clan-overview ul li {
+  display: flex;
+  align-items: center;
+}
+.clan-overview ul li img {
+  margin-left: 10px;
+}
