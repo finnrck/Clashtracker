@@ -103,7 +103,7 @@ async function updatePassword(newPW, user_id) {
       return response;
     } else {
       console.log(response);
-      console.error("Fehler beim Einfügen des Accounts:", response.message);
+      console.error("Fehler beim ändern des Passworts:", response.message);
       return response;
     }
   });
@@ -195,9 +195,9 @@ async function displayComparisonToAltAcc(playerData, input) {
     const alternativData = response.data;
 
     if (response.status === "success") {
-      console.log("daten eingefügt");
+      console.log("vergleich Daten gefunden");
     } else {
-      console.error("Fehler beim Speichern der Daten: ", response.message);
+      console.error("Fehler beim Abrufen der Daten: ", response.message);
     }
 
     const html = createHtmlforComparsion(playerData, alternativData);
@@ -320,12 +320,12 @@ async function createLineGraph(
   console.log(result);
 
   var margin = { top: 30, right: 60, bottom: 60, left: 90 },
-    width = 1200 - margin.left - margin.right, // Breite der x-Achse erhöht
-    height = 300 - margin.top - margin.bottom;
+    width = 1200 - margin.left - margin.right, // breite  x achse 
+    height = 300 - margin.top - margin.bottom; // höhe y achse
 
   var x = d3.scaleLinear().range([0, width]);
 
-  // Separate Skalierungen für jede Y-Achse
+  // skalierung der y achsen seperat
   var yGold = d3.scaleLinear().range([height, 0]);
   var yElexier = d3.scaleLinear().range([height, 0]);
   var yDarkelexier = d3.scaleLinear().range([height, 0]);
@@ -423,9 +423,9 @@ async function createLineGraph(
   svgGold
     .append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung
 
-  svgGold.append("g").call(d3.axisLeft(yGold).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
+  svgGold.append("g").call(d3.axisLeft(yGold).tickFormat(formatYAxis));
 
   svgGold
     .append("path")
@@ -438,9 +438,9 @@ async function createLineGraph(
   svgElexier
     .append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); 
 
-  svgElexier.append("g").call(d3.axisLeft(yElexier).tickFormat(formatYAxis)); // format
+  svgElexier.append("g").call(d3.axisLeft(yElexier).tickFormat(formatYAxis));
   svgElexier
     .append("path")
     .datum(elexierData)
@@ -452,11 +452,11 @@ async function createLineGraph(
   svgDarkelexier
     .append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); // Zeitformatierung hinzugefügt
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%d.%m.%y"))); 
 
   svgDarkelexier
     .append("g")
-    .call(d3.axisLeft(yDarkelexier).tickFormat(formatYAxis)); // formatYAxis-Funktion verwenden
+    .call(d3.axisLeft(yDarkelexier).tickFormat(formatYAxis));
 
   svgDarkelexier
     .append("path")
